@@ -1,0 +1,35 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "root": true,
+  "files": {
+    "includes": [
+      "tests/**/*.{ts,tsx,js,mjs,cjs,json,css}",
+      "scripts/**/*.{ts,tsx,js,mjs,cjs,json,css}",
+      "tools/format/**/*.json",
+      "*.{ts,js,mjs,cjs,json}",
+      "!tavern_sync.mjs",
+      "!bun.lock"
+    ],
+    "ignoreUnknown": true
+  },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf",
+    "formatWithErrors": false
+  },
+  "linter": { "enabled": false },
+  "assist": { "enabled": false },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "asNeeded"
+    }
+  }
+}

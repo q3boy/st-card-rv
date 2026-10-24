@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "description": "状态栏随脚本携带的 SVG 与第三方图标许可。地图标记与图例使用 map-person.svg、map-rv.svg，标题等高线为 title-contours.svg，均为本项目以可复现几何绘制，不含第三方素材。",
+  "mapColor": "#214D47",
+  "assets": [
+    { "id": "map-person", "file": "图形/map-person.svg", "use": "地图主角标记与图例", "source": "本项目 SVG 几何绘制" },
+    { "id": "map-rv", "file": "图形/map-rv.svg", "use": "地图房车标记与图例", "source": "本项目 SVG 几何绘制" },
+    { "id": "title-contours", "file": "图形/title-contours.svg", "use": "标题栏等高线装饰", "source": "本项目程序生成的地形等高线（高斯山丘叠加低频扰动，marching squares 提取）" }
+  ],
+  "sources": [
+    {
+      "package": "@phosphor-icons/vue",
+      "version": "2.2.1",
+      "license": "MIT",
+      "licenseText": "MIT License\n\nCopyright (c) 2020 Phosphor Icons\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+    }
+  ]
+}

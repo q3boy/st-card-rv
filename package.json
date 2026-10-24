@@ -1,0 +1,51 @@
+{
+  "name": "st-card-rv",
+  "private": true,
+  "version": "0.1.0",
+  "author": "卡卡西天取经<q3boy1@gmail.com>",
+  "engines": {
+    "bun": "1.4.2",
+    "node": ">=22.6.0"
+  },
+  "type": "module",
+  "scripts": {
+    "build:check": "bun run scripts/build.ts",
+    "build": "bun run scripts/bundle.ts",
+    "build:sync": "bun run build && bun run sync push 房车",
+    "sync": "bun run tavern_sync.mjs",
+    "encode-webp": "bun run tools/配图/脚本/encode-webp.mjs",
+    "test": "bun test --parallel=6 ./tests/core ./tests/tools",
+    "test:browser": "bun run scripts/browser-test.ts",
+    "serve": "bun run scripts/serve.ts",
+    "typecheck": "node --experimental-strip-types scripts/typecheck.ts && tsc -p tsconfig.test.json",
+    "clean:test": "bun run scripts/clean-test.ts all",
+    "clean": "bun run clean:test",
+    "format": "bun run format:files .",
+    "format:check": "bun run format:check:files .",
+    "format:files": "bun x @biomejs/biome@2.5.15 format --config-path=tools/format/format.json --write",
+    "format:check:files": "bun x @biomejs/biome@2.5.15 format --config-path=tools/format/format.json",
+    "docs:check": "bun run scripts/docs-check.ts",
+    "docs:refs:in": "bun run scripts/docs-refs.ts in",
+    "docs:refs:out": "bun run scripts/docs-refs.ts out",
+    "types:sync": "bun run scripts/sync-types.ts",
+    "hooks:install": "bun run scripts/install-hooks.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/node": "4.3.3",
+    "@tailwindcss/oxide": "4.3.3",
+    "@types/bun": "1.4.2",
+    "@types/sql.js": "1.4.11",
+    "@vue/compiler-sfc": "3.5.44",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.12",
+    "yaml": "2.9.1"
+  },
+  "dependencies": {
+    "@phosphor-icons/vue": "2.2.1",
+    "sql.js": "1.14.2",
+    "vue": "3.5.44"
+  }
+}

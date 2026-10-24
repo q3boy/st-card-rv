@@ -1,0 +1,4 @@
+# Preserve bundled tools, declaration copies and authored content byte-for-byte.
+# The formatter controls LF for code; checkout must not change those bytes.
+* -text
+.githooks/* text eol=lf

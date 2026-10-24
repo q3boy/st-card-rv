@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* 组件只消费下面这组语义变量；时段与深色模式只换变量值 */
+@theme inline {
+  --color-frm: var(--frm);
+  --color-frme: var(--frme);
+  --color-card: var(--card);
+  --color-edge: var(--edge);
+  --color-sep: var(--sep);
+  --color-accent: var(--accent);
+  --color-tc: var(--tc);
+  --color-ink: var(--ink);
+  --color-subtle: var(--subtle);
+  --color-soft: var(--soft);
+  --color-legend: var(--legend);
+  --color-pill: var(--pill-bg);
+  --color-pill-text: var(--pill-text);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --color-warn: var(--warn);
+  --font-serif: "Noto Serif SC", "Songti SC", SimSun, serif;
+  --font-sans: "Microsoft YaHei", system-ui, sans-serif;
+}
+
+/* 语义色：不随时段变化。--art-filter、--map-filter 为设计页占位用，产品不使用（地图不加滤镜，配图不加滤镜）。 */
+.rv-app {
+  --pos: #357d62; --neg: #b8432c; --warn: #a8721a; --on-accent: #fff; --chip: #ffffff88; --shadow: 0 1px 3px #6b4a2a14;
+  /* 旧手写样式（角色、物品 Tab 等）使用的变量名，映射到时段／深色语义变量；这些 Tab 改用工具类后删除 */
+  --panel-bg: var(--frm); --header-bg: var(--frm); --card-bg: var(--card); --detail-bg: var(--soft);
+  --border: var(--edge); --border-soft: var(--sep); --text: var(--ink); --accent-text: var(--on-accent);
+  --track: var(--vtrack); --tag-bg: var(--pill-bg); --tag-text: var(--pill-text); --resource-fill: var(--accent);
+  --frame-border: var(--frme); --scroll-thumb: var(--frme); --scroll-thumb-hover: var(--accent);
+}
+
+/* 四时段配色（用户已确认的值） */
+.tod-dawn { --frm:#EFEBF6;--frme:#BCB2D2;--legend:#F1EDF8;--card:#FCFBFE;--tc:#675A8C;--accent:#8B7CAE;--sep:#E3DCF1;--edge:#D8D0E7;--g1:#E9DAF2;--g2:#DED0EE;--s1:#F5F0FA;--s2:#FAF5FA;--c0:#F8F4FB;--v2:#F0EAF7;--v3:#E4DCEE;--vg:#D9CBEA6E;--vsep:#E1DBEC;--vtrack:#E6E0F0;--soft:#F5F0FA;--ink:#3E3757;--subtle:#7A7392;--pill-bg:#EFEAF8;--pill-text:#6A5E8C }
+.tod-day   { --frm:#F6F3EA;--frme:#C6AD84;--legend:#F2EFE4;--card:#FEFCF6;--tc:#8A6027;--accent:#AD8038;--sep:#E8DCC0;--edge:#D9C9A8;--g1:#FBE7B0;--g2:#FDF2D6;--s1:#FDF7E8;--s2:#FEFBF2;--c0:#FDFAF0;--v2:#F6EEDC;--v3:#E9DDC2;--vg:#F8E4B86E;--vsep:#E2D6BC;--vtrack:#E3DCC6;--soft:#FDF7E8;--ink:#3F3320;--subtle:#7C6E55;--pill-bg:#F6EEDC;--pill-text:#7A5A22 }
+.tod-dusk  { --frm:#F7F0E8;--frme:#C9A57E;--legend:#F6EEE4;--card:#FFFCF7;--tc:#A9512C;--accent:#BD6A38;--sep:#F2D6C1;--edge:#DFC3AE;--g1:#FFB287;--g2:#FFCDA8;--s1:#FFF0E2;--s2:#FFF6EC;--c0:#FEF6F0;--v2:#F8E8DB;--v3:#EBD5C1;--vg:#FFC8A46E;--vsep:#EAD8C8;--vtrack:#E6DACE;--soft:#FFF0E2;--ink:#4A2E22;--subtle:#8C6E58;--pill-bg:#FBEBDF;--pill-text:#96502B }
+.tod-night { --frm:#E7EBF3;--frme:#A9B5CE;--legend:#EAEDF5;--card:#F8F9FD;--tc:#3A4A73;--accent:#6E7BA6;--sep:#CFD6E5;--edge:#C8D0DF;--g1:#A7B7DA;--g2:#C6D0E6;--s1:#EDF0F7;--s2:#F6F4F0;--c0:#F4F5FA;--v2:#E9EBF2;--v3:#DDE0E9;--vg:#BFCAE36E;--vsep:#D5D8E0;--vtrack:#DEE0E9;--soft:#EDF0F7;--ink:#333D5C;--subtle:#6F7B99;--pill-bg:#EDF0F8;--pill-text:#51608B }
+
+/* 深色模式：一套统一配色，不区分时段。暖炭灰底 + 黄铜强调，语义色提亮以保证深底对比度 */
+.theme-dark {
+  --frm:#1B1A18;--frme:#4B4338;--legend:#2A2723;--card:#24221F;--tc:#E2B877;--accent:#C99A57;--sep:#36312A;--edge:#3F3930;
+  --g1:#4A3A2255;--g2:#2E281F44;--s1:#2B2822;--s2:#272420;--c0:#25231F;--v2:#22201D;--v3:#1C1B19;--vg:#C99A5718;--vsep:#36312A;--vtrack:#3A352E;
+  --soft:#2D2924;--ink:#ECE4D6;--subtle:#A39887;--pill-bg:#332E26;--pill-text:#DDBB85;
+  --pos:#6DBB97;--neg:#E5856E;--warn:#E0AE55;--on-accent:#1B1A18;--chip:#ffffff0d;--shadow:0 1px 3px #0006;
+}
+
+@layer components {
+  .rv-glow { background: radial-gradient(circle at 94% -12%, var(--g1) 0, var(--g2) 24%, transparent 54%); }
+  .rv-card { background: var(--card); border: 1px solid var(--edge); border-radius: 10px; box-shadow: var(--shadow); }
+  .rv-scene { background: radial-gradient(circle at 96% 2%, var(--g1) 0, var(--g2) 23%, transparent 63%), linear-gradient(168deg, var(--s1) 0%, var(--s2) 55%, var(--c0) 100%); }
+  .rv-vehicle { background: radial-gradient(circle at 94% 3%, var(--vg) 0, transparent 56%), linear-gradient(180deg, var(--c0) 0%, var(--v2) 62%, var(--v3) 100%); }
+  /* 强调竖线只出现在场景卡、地图卡和角色姓名 */
+  .rv-bar { position: relative; }
+  .rv-bar::before { content: ""; position: absolute; left: var(--bar-x, -17px); top: 50%; translate: 0 -50%; width: 4px; height: 26px; border-radius: 2px; background: var(--accent); }
+  .rv-track { background: var(--vtrack); }
+  .rv-track > i.lv-ok { background: linear-gradient(90deg, #6fa37f, #4c9070); }
+  .rv-track > i.lv-warn { background: linear-gradient(90deg, #e6b24f, #d9962f); }
+  .rv-track > i.lv-bad { background: linear-gradient(90deg, #d9735a, #c4573f); }
+}
