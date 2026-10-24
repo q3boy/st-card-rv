@@ -4,4 +4,4 @@
 
 独立安装、构建、测试和声明同步见[开发与文档入口](doc/README.md)。运行命令前进入本仓库根目录；不需要父仓库源码或依赖目录。真实酒馆部署、模型请求和测试数据写入按[部署验证流程](doc/真实酒馆部署验证流程.md)另行确认授权。
 
-外部工具与素材许可见 [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES.md)。
+本项目采用 [CC BY-NC-SA 4.0 许可证](LICENSE.md)，与 SQLite Helper 主仓库一致。外部工具与素材沿用各自许可，见 [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES.md)。
