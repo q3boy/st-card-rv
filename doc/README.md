@@ -64,6 +64,8 @@ bun run docs:check
 
 ## 职责边界
 
+[安装引导脚本](../脚本/install.js)通过 CDN import 加载 SQLite Helper 的安装与更新引导，随角色脚本启用。缺少插件时由玩家确认安装；正式 Git 版有更新时由玩家确认更新，成功后再选择是否刷新。运行需要联网，脚本自身的后续更新在重新加载且 CDN 缓存更新后生效。它不替代 DVS 的接口等待与业务注册，具体行为见[安装引导说明](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/使用/安装引导脚本.md)。
+
 [主世界书版本检查脚本](../脚本/主世界书版本检查.js)在启动时独立调用一次 `DVS.lorebookVersionCheck({ onExpired: 'AUTO_UPDATE' })`。主书落后时由玩家确认是否备份并更新，成功后玩家点击刷新页面；不依赖变量注册，也不保证先于注册运行。卡片版本和主书唯一 `[DVS_VERSION]` 条目应同步维护，完整规则见[DVS 作者手册](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/dvs/指南/DVS作者使用手册.md#可选检查主世界书版本)。
 
 `DVS.js` 注册业务规则，正文完成后的自动变量更新及 JSON 显示／隐藏由 DVS 插件处理，悬浮栏通过更新通知重读状态。确认稿只是视觉参考，不作为实际界面证据。
