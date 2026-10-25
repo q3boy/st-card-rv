@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://testingcf.jsdelivr.net/gh/StageDog/tavern_sync/dist/schema/character.zh.json
 头像: 封面
-版本: "0.1.3"
+版本: "0.1.4"
 作者: "卡卡西天取经"
 备注: |-
   必备插件：
@@ -29,7 +29,7 @@
     递归:
       不可被其他条目激活: true
       不可激活其他条目: true
-    内容: "0.1.3"
+    内容: "0.1.4"
   - 名称: '[DVS_DDL]v0.1.0'
     启用: false
     激活策略:
