@@ -35,11 +35,11 @@ test('房车索引单独声明七项变量核对，实际业务规则内容与�
       };
     }),
   );
-  const cotEntry = entries.find(entry => entry.name === '[DVS_VAR_COT]本轮变量核对')!;
+  const cotEntry = entries.find(entry => entry.name === '[DVS:变量COT]本轮变量核对')!;
   expect(cotEntry.enabled).toBe(true);
   expect(cotEntry.order).toBe(116);
-  expect(entries.slice(entries.indexOf(cotEntry) + 1).some(entry => entry.name.includes('[DVS_RULES]'))).toBe(false);
-  expect(entries.indexOf(cotEntry)).toBeLessThan(entries.findIndex(entry => entry.name.includes('[DVS_DATA]')));
+  expect(entries.slice(entries.indexOf(cotEntry) + 1).some(entry => entry.name.includes('[DVS:变量规则]'))).toBe(false);
+  expect(entries.indexOf(cotEntry)).toBeLessThan(entries.findIndex(entry => entry.name.includes('[DVS:变量数据]')));
   expect(cotEntry.content.match(/^\d+\. /gm)).toHaveLength(7);
   for (const check of [
     '跨日、跨周、跨月、跨年',
@@ -49,7 +49,7 @@ test('房车索引单独声明七项变量核对，实际业务规则内容与�
   ]) {
     expect(cotEntry.content).toContain(check);
   }
-  const ruleEntries = entries.filter(entry => entry.name.startsWith('[DVS_RULES]'));
+  const ruleEntries = entries.filter(entry => entry.name.startsWith('[DVS:变量规则]'));
   expect(ruleEntries.every(entry => entry.enabled)).toBe(true);
   const rules = ruleEntries.map(entry => entry.content).join('\n');
   expect(rules).toContain('行车/驻车/外出时长互不重复，覆盖本轮经过时间');

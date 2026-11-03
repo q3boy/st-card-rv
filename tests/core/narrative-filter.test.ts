@@ -118,7 +118,7 @@ async function narrativeEntries(): Promise<AuthorEntry[]> {
   return Promise.all(
     index.条目.flatMap(
       (item: { 名称: string; 启用: boolean; 文件: string; 插入位置: { 顺序: number } }, uid: number) => {
-        const name = item.名称.replace(/\[DVS_[^\]]+\]/g, '');
+        const name = item.名称.replace(/\[DVS:[^\]]+\]/g, '');
         if (!names.includes(name)) return [];
         return [
           (async () => {
@@ -195,7 +195,7 @@ test('实际索引声明物品复合键筛选、正文标签及四字段旅行�
   expect(entries).toHaveLength(6);
   expect(author.uniqueKeys.房车物资).toEqual(['物品名']);
   expect(author.uniqueKeys.随身物品).toEqual(['持有人', '物品名']);
-  const state = entries.find(entry => entry.name === '[DVS_NAR]当前状态')!;
+  const state = entries.find(entry => entry.name === '[DVS:预处理,正文]当前状态')!;
   const filters = [...state.content.matchAll(/\[\[DVS_DATA_([^:\]]+):md:([^:\]]+):([\s\S]*?)\]\]/g)];
   expect(filters.map(match => [match[1], match[2]])).toEqual([
     ['房车物资', '本轮相关'],
@@ -215,8 +215,9 @@ test('实际索引声明物品复合键筛选、正文标签及四字段旅行�
   expect(state.content).toContain('额外的桶装饮用水和备用油桶另见房车物资');
   expect(state.content).not.toContain('| 饮用水 |');
   expect(state.content).not.toContain('维修工具');
-  expect(entries.find(entry => entry.content.includes('<item_房车基础信息>'))!.name).toStartWith('[DVS_NAR]');
-  const plotEntries = entries.filter(entry => entry.name.startsWith('[DVS_PLOT]'));
+  expect(entries.find(entry => entry.content.includes('<item_房车基础信息>'))!.name).toStartWith('[DVS:预处理,正文]');
+  expect(detail.name).toStartWith('[DVS:正文;可筛选]');
+  const plotEntries = entries.filter(entry => entry.name.startsWith('[DVS:剧情规划]'));
   expect(plotEntries).toHaveLength(1);
   const plot = plotEntries[0]!.content;
   expect([...plot.matchAll(/\[\[DVS_PLOT:start:([^\]]+)\]\]/g)].map(match => match[1])).toEqual([
@@ -227,14 +228,14 @@ test('实际索引声明物品复合键筛选、正文标签及四字段旅行�
   ]);
   const style = entries.find(entry => entry.name.endsWith('去AI味'))!;
   const writing = entries.find(entry => entry.name.endsWith('写作规范'))!;
-  expect(style.name).toContain('[DVS_FILTER_SKIP]');
-  expect(style.name).toContain('[DVS_NAR]');
-  expect(writing.name).toStartWith('[DVS_NAR]');
-  expect(writing.name).not.toContain('[DVS_FILTER_SKIP]');
+  expect(style.name).toBe('[DVS:正文]去AI味');
+  expect(writing.name).toStartWith('[DVS:预处理,正文]');
   expect(plot).toContain('不为制造剧情强行加入新人、事故或冲突');
   expect(plot).toContain('先依据完整资料规划至玩家本轮行动的结束位置');
   expect(plot).toContain('不为保留物资扩写剧情');
   const index = parse(await Bun.file(resolve(cardRoot, 'index.yaml')).text());
   const flags = index.扩展字段.酒馆助手.脚本库.find((script: { 名称: string }) => script.名称 === 'DVS').数据;
-  expect(flags).toMatchObject({ dvs_enable: true, dvs_input_inject: true, dvs_plot: true });
+  expect(flags).toMatchObject({
+    dvs: { enabled: true, exts: { tables_opt: true, plot_plan: true }, config: { lb_opt: { llm_filter: true } } },
+  });
 });

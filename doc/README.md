@@ -40,7 +40,7 @@ bun run docs:check
 | `bun run typecheck` | 用 Node 调用 vue-tsc，并检查测试 TypeScript |
 | `bun run build:check` | 只生成隔离的状态栏构建，不复制到卡片脚本目录、不打包或推送角色卡 |
 | `bun run build` | 构建状态栏脚本，带 `--publish` 复制到 `脚本/状态栏.js`，再执行 `tavern_sync bundle 房车` 打包角色卡 |
-| `bun run build 0.1.3` | 先将 `index.yaml` 的 `版本` 和 `[DVS_VERSION]` 条目的 `内容` 都改为传入的版本号，再构建并打包 |
+| `bun run build 0.1.3` | 先将 `index.yaml` 的 `版本` 和 `[DVS:版本]` 条目的 `内容` 都改为传入的版本号，再构建并打包 |
 | `bun run build:sync` | 先执行 `build`，再执行 `tavern_sync push 房车` 推送到当前连接的酒馆 |
 | `bun run test:browser [Playwright 参数]` | 隔离构建后运行 Chromium 模拟 Helper 浏览器测试，产物在 `.test-data/card-rv`；例如 `bun run test:browser --grep 地图` |
 | `bun run sync <子命令> [参数]` | 使用本库 YAML 执行同步工具命令；例如 `bun run sync list`、`bun run sync bundle 房车`，推送前按部署流程确认目标 |
@@ -66,7 +66,7 @@ bun run docs:check
 
 [安装引导脚本](../脚本/install.js)通过 CDN import 加载 SQLite Helper 的安装与更新引导，随角色脚本启用。缺少插件时由玩家确认安装；正式 Git 版有更新时由玩家确认更新，成功后再选择是否刷新。运行需要联网，脚本自身的后续更新在重新加载且 CDN 缓存更新后生效。它不替代 DVS 的接口等待与业务注册，具体行为见[安装引导说明](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/使用/安装引导脚本.md)。
 
-[主世界书版本检查脚本](../脚本/主世界书版本检查.js)在启动时独立调用一次 `DVS.lorebookVersionCheck({ onExpired: 'AUTO_UPDATE' })`。主书落后时由玩家确认是否备份并更新，成功后玩家点击刷新页面；不依赖变量注册，也不保证先于注册运行。卡片版本和主书唯一 `[DVS_VERSION]` 条目应同步维护，完整规则见[DVS 作者手册](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/dvs/指南/DVS作者使用手册.md#可选检查主世界书版本)。
+[主世界书版本检查脚本](../脚本/主世界书版本检查.js)在启动时独立调用一次 `DVS.lorebookVersionCheck({ onExpired: 'AUTO_UPDATE' })`。主书落后时由玩家确认是否备份并更新，成功后玩家点击刷新页面；不依赖变量注册，也不保证先于注册运行。卡片版本和主书唯一 `[DVS:版本]` 条目应同步维护，完整规则见[DVS 作者手册](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/dvs/指南/DVS作者使用手册.md#可选检查主世界书版本)。
 
 `DVS.js` 注册业务规则，正文完成后的自动变量更新及 JSON 显示／隐藏由 DVS 插件处理，悬浮栏通过更新通知重读状态。确认稿只是视觉参考，不作为实际界面证据。
 

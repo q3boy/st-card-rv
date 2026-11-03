@@ -16,13 +16,13 @@ if (args.length === 1) {
   if (document.errors.length) throw new AggregateError(document.errors, '房车 index.yaml 解析失败');
   const entries = document.get('条目');
   if (!isSeq(entries)) throw new Error('房车 index.yaml 缺少条目列表');
-  const versionEntries = entries.items.filter(entry => isMap(entry) && entry.get('名称') === '[DVS_VERSION]');
+  const versionEntries = entries.items.filter(entry => isMap(entry) && entry.get('名称') === '[DVS:版本]');
   if (versionEntries.length !== 1 || !isMap(versionEntries[0])) {
-    throw new Error('房车 index.yaml 必须有且仅有一个 [DVS_VERSION] 条目');
+    throw new Error('房车 index.yaml 必须有且仅有一个 [DVS:版本] 条目');
   }
   const fields = [document.get('版本', true), versionEntries[0].get('内容', true)];
   const ranges = fields.map(field => {
-    if (!isScalar(field) || !field.range) throw new Error('房车版本和 [DVS_VERSION] 内容必须是直接填写的值');
+    if (!isScalar(field) || !field.range) throw new Error('房车版本和 [DVS:版本] 内容必须是直接填写的值');
     return field.range;
   });
   // 只替换两个值，保留作者的注释、排版及其他未提交修改。
@@ -31,7 +31,7 @@ if (args.length === 1) {
     updated = updated.slice(0, start) + JSON.stringify(cardVersion) + updated.slice(end);
   }
   await writeFile(indexPath, updated);
-  console.log(`房车卡片版本与 [DVS_VERSION] 已更新为 ${cardVersion}`);
+  console.log(`房车卡片版本与 [DVS:版本] 已更新为 ${cardVersion}`);
 }
 
 for (const command of [
