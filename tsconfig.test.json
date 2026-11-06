@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["tests/**/*.ts", "scripts/**/*.ts", "playwright.config.ts", "状态栏/assets.d.ts"]
+  "include": ["tests/**/*.ts", "scripts/**/*.ts", "playwright.config.ts", "状态栏/assets.d.ts", "生成拦截/assets.d.ts"]
 }

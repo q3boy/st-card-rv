@@ -1,3 +1,5 @@
+import { npcInteraction } from '../生成拦截/npc';
+
 $(async () => {
   const relationshipStage = affection => {
     if (affection < -70) return '敌视';
@@ -105,6 +107,7 @@ $(async () => {
     await waitGlobalInitialized('DVS');
     await DVS.register({
       scriptId: getScriptId(),
+      preNarrativeUi: [npcInteraction],
       uniqueKeys: {
         世界信息: ['标识'],
         房车信息: ['标识'],

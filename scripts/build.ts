@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import { version as tailwindVersion } from 'tailwindcss/package.json' with { type: 'json' };
 import { compileTailwind, tailwindEntry } from './tailwind';
 import { compileVueStyles, registerVueLoader } from './vue-sfc';
+import { buildNpcAuthor } from './author-build';
 
 const root = resolve(import.meta.dir, '..');
 const output = resolve(root, process.env.CARD_RV_BUILD_DIR ?? '.test-data/card-rv/build');
@@ -153,14 +154,23 @@ const scriptPath = join(output, '状态栏.js');
 const content = await result.outputs[0]!.text();
 const scriptContent = `// 房车状态栏 build ${buildId}; Vue compiler ${version}\n/*!\n${licenseText.replaceAll('*/', '* /')}\n*/\n${content}\n`;
 await writeFile(scriptPath, scriptContent);
+const authorScriptPath = join(output, 'DVS.js');
+const authorScript = `// 房车 DVS 与 NPC build ${buildId}\n${await buildNpcAuthor()}\n`;
+await writeFile(authorScriptPath, authorScript);
 await writeFile(join(output, 'THIRD-PARTY-LICENSES.txt'), licenseText);
 const sources = sourceFiles.map(name => `状态栏/${name}`);
+sources.push(
+  ...(await readdir(join(root, '生成拦截'), { recursive: true }))
+    .filter(name => /\.(ts|vue|css)$/.test(name))
+    .map(name => `生成拦截/${name.replaceAll('\\', '/')}`),
+);
 sources.push(
   tailwindEntry,
   'scripts/tailwind.ts',
   '脚本/DVS.js',
   'index.yaml',
   'scripts/build.ts',
+  'scripts/author-build.ts',
   licenseSource,
   'package.json',
   'bun.lock',
@@ -183,6 +193,11 @@ await writeFile(
       vueCompiler: version,
       tailwind: { version: tailwindVersion, cssBytes: Buffer.byteLength(tailwind.css) },
       bytes: Buffer.byteLength(scriptContent),
+      author: {
+        script: 'DVS.js',
+        bytes: Buffer.byteLength(authorScript),
+        sha256: createHash('sha256').update(authorScript).digest('hex'),
+      },
       sourceHashes,
       scriptSha256: createHash('sha256')
         .update(new Uint8Array(await Bun.file(scriptPath).arrayBuffer()))
@@ -196,6 +211,7 @@ await writeFile(
 );
 if (process.argv.includes('--publish')) {
   await copyFile(scriptPath, join(root, '脚本/状态栏.js'));
+  await copyFile(authorScriptPath, join(root, '脚本/DVS.bundle.js'));
 }
 console.log(
   `房车状态栏 ${buildId}: ${Buffer.byteLength(scriptContent)} bytes; ${images.filter(image => image.format === 'webp').length} WebP + ${images.filter(image => image.format === 'svg').length} SVG; ${scriptPath}`,

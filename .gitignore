@@ -3,6 +3,7 @@
 /.test-data/
 /test-results/
 /脚本/状态栏.js
+/脚本/DVS.bundle.js
 /人设图/
 /.codegraph/
 /.qmd/

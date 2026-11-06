@@ -9,6 +9,7 @@
 | 理解旅行手册的布局、四时段主题、配图、交互和数据读取 | [状态栏设计](状态栏设计.md) |
 | 修改状态栏、ShadowRoot 样式、注册订阅或自动化测试 | [代码设计与测试方案](状态栏代码设计与测试方案.md) |
 | 调整正文资料筛选、旅行规划、变量检查或油电水结算 | [场景与资源结算设计](房车场景与资源结算设计.md) |
+| 修改 NPC 生成拦截的界面、请求或 YAML 解析 | [NPC 注册与挂载](../生成拦截/npc/index.ts)、[请求框架](../生成拦截/npc/requests.ts)、[人设解析](../生成拦截/npc/profile.ts) |
 | 维护 12 张房车配图、地图 SVG、图标与许可 | [状态栏素材](状态栏素材.md) |
 | 查四时段及深色界面的颜色 | [主色值表](状态栏主色值表.md) |
 | 在获授权后部署真实酒馆验证、恢复数据 | [真实酒馆部署验证流程](真实酒馆部署验证流程.md) |
@@ -38,8 +39,8 @@ bun run docs:check
 | --- | --- |
 | `bun run test` | 运行 `tests/core` 房车业务与状态栏测试及 `tests/tools` 工具检查 |
 | `bun run typecheck` | 用 Node 调用 vue-tsc，并检查测试 TypeScript |
-| `bun run build:check` | 只生成隔离的状态栏构建，不复制到卡片脚本目录、不打包或推送角色卡 |
-| `bun run build` | 构建状态栏脚本，带 `--publish` 复制到 `脚本/状态栏.js`，再执行 `tavern_sync bundle 房车` 打包角色卡 |
+| `bun run build:check` | 只生成隔离的状态栏和 DVS 作者构建，不复制到卡片脚本目录、不打包或推送角色卡 |
+| `bun run build` | 构建后带 `--publish` 复制到 `脚本/状态栏.js`、`脚本/DVS.bundle.js`，再执行 `tavern_sync bundle 房车` 打包角色卡 |
 | `bun run build 0.1.3` | 先将 `index.yaml` 的 `版本` 和 `[DVS:版本]` 条目的 `内容` 都改为传入的版本号，再构建并打包 |
 | `bun run build:sync` | 先执行 `build`，再执行 `tavern_sync push 房车` 推送到当前连接的酒馆 |
 | `bun run test:browser [Playwright 参数]` | 隔离构建后运行 Chromium 模拟 Helper 浏览器测试，产物在 `.test-data/card-rv`；例如 `bun run test:browser --grep 地图` |
@@ -50,7 +51,7 @@ bun run docs:check
 
 ## 公开声明与提交 hook
 
-`types/sqlite-helper/` 保存完整公开声明副本，共 16 个 `.d.ts` 文件，包含两个入口及其依赖；独立构建直接使用此副本。正常安装、构建和测试不读取父仓库、不触发同步。
+`types/sqlite-helper/` 保存完整公开声明副本，包含两个入口、依赖及随包提供的第三方声明；独立构建直接使用此副本。正常安装、构建和测试不读取父仓库、不触发同步。
 
 需要提交前同步时，显式运行 `bun run hooks:install` 安装本库 pre-commit。已有默认 pre-commit 或其它 `core.hooksPath` 时安装器停止并说明如何合并，不覆写原 hook。hook 在房车按 `card/房车/` 挂载时尝试读取父库 `release/st-sqlite-helper/types`；来源不存在便保留副本并允许提交，来源存在但读取、复制或暂存失败会使提交失败。
 
@@ -60,7 +61,21 @@ bun run docs:check
 
 `bun run clean:test`（或 `bun run clean`）只清理本库 `.test-data/card-rv` 和固定的 `.test-data/evidence/房车地图提示与标识`，不接受自定义目录。其它专项证据及 `CARD_RV_BUILD_DIR` 自定义产物由所属轮次核对后处理。清理前先保存必要证据和恢复所需备份。
 
-配图制作资料见 [tools/配图](../tools/配图/README.md)。已纳入版本管理的工具与资料随仓库保留；`人设图/`、生成的 `脚本/状态栏.js`、`dist/`、`.test-data/` 继续忽略。同步工具来源与许可见 [THIRD-PARTY-NOTICES](../THIRD-PARTY-NOTICES.md)，不自动运行 `sync update`。
+配图制作资料见 [tools/配图](../tools/配图/README.md)。已纳入版本管理的工具与资料随仓库保留；`人设图/`、生成的 `脚本/状态栏.js`、`脚本/DVS.bundle.js`、`dist/`、`.test-data/` 继续忽略。同步工具来源与许可见 [THIRD-PARTY-NOTICES](../THIRD-PARTY-NOTICES.md)，不自动运行 `sync update`。
+
+## NPC 生成拦截
+
+可编辑的 `脚本/DVS.js` 导入 NPC 模块，并在原有唯一一次注册中提供 `npc_generate`。卡片 DVS 脚本配置开启 `pre_narr_ui`，主世界书保留“NPC生成机制”和“人设生成”两条规则。需要配套支持 `context.worldbook.getEntries()` 和 `narrativeEntriesSkip` 的 SQLite Helper；接口说明见[生成拦截](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/dvs/指南/DVS接口与进阶用法.md#生成拦截)。
+
+界面第一次打开会读取两条规则并请求人设。底部“重新生成人设”位于确认按钮左侧，不填写要求即可重新构思新人；有额外要求时展开默认折叠的“生成要求”填写，初始为空，无字符上限。同一次打开内的成功调整历史随后续请求提供，关闭后丢弃，重新打开只预载最新确认人设。模型返回 `<npc_实际姓名>` 内的 YAML，界面按原型全部分组展示；最终确认只保存完整标签文本。正文交接使用同一份原文，并通过扩展的屏蔽名单排除本轮两条自动生成规则。注册项 `insist` 和 `toPrompt` 资料区都要求完整人设标签及内容在正文末尾原样输出；这是给模型的要求，代码不会自动补写遗漏的人设块。角色表仍由正文后原有变量流程更新，组件不直接写库。
+
+弹窗界面固定使用原型白天配色。胶囊仅以自身样式显示姓名、年龄、职业和“查看/重新生成NPC”按钮，不嵌入房车人设卡。打开或取消弹窗不改变已有胶囊，确认保存后更新摘要。Vue 在真正打开界面时才初始化；缺少兼容运行环境时显示更新和重开角色的提示，胶囊普通文字摘要、原有结算注册及已保存人设的正文交接保持可用。
+
+解析时忽略 YAML 第一层标题，直接读取其第一项人设。请求或格式失败时，可展开“查看详情”查看错误及本次原始 LLM 返回；没有取得返回时明确说明，不沿用上一次请求的返回。
+
+配套 Helper 在生成拦截区域提供“继续交互”和“重新调整”。重新调整从 context.result 恢复人设，打开时不自动请求候选；确认后由 Helper 保存并生成或重新生成正文。顶部整套输入增强重做仍只保存。取消保留已完成的规划和筛选，同项旧人设只有确认后才替换。
+
+修改源文件后先构建再打包或推送，`index.yaml` 引用的是生成文件 `脚本/DVS.bundle.js`，不是可编辑入口。`build:check` 在隔离目录同时输出 `DVS.js` 和 `状态栏.js`，`build.json` 记录作者产物哈希及源码哈希。
 
 ## 职责边界
 

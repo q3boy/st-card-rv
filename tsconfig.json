@@ -9,5 +9,5 @@
     "skipLibCheck": true,
     "types": ["bun"]
   },
-  "include": ["状态栏/**/*.ts", "状态栏/**/*.vue"]
+  "include": ["状态栏/**/*.ts", "状态栏/**/*.vue", "生成拦截/**/*.ts", "生成拦截/**/*.vue"]
 }

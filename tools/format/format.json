@@ -3,6 +3,7 @@
   "root": true,
   "files": {
     "includes": [
+      "生成拦截/**/*.{ts,tsx,js,mjs,cjs,json,css}",
       "tests/**/*.{ts,tsx,js,mjs,cjs,json,css}",
       "scripts/**/*.{ts,tsx,js,mjs,cjs,json,css}",
       "tools/format/**/*.json",

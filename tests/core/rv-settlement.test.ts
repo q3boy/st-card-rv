@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { DvsPromptTables, DvsPromptValues } from '../../types/sqlite-helper/dvs';
 import { sqlJs } from '../support/database';
+import { authorSource, authorGlobals } from '../support/author';
 
 interface RvRegistration {
   uniqueKeys: Record<string, string[]>;
@@ -10,13 +11,12 @@ interface RvRegistration {
 
 // 执行卡片原脚本，取得实际注册的回调；只模拟脚本启动所需的酒馆接口。
 async function loadCard() {
-  const source = await Bun.file(new URL('../../脚本/DVS.js', import.meta.url)).text();
   let registration: RvRegistration | undefined, started: Promise<void> | undefined;
   const jquery = (value: unknown) => {
     if (typeof value === 'function') started = Promise.resolve(value());
     return { one() {} };
   };
-  new Function('$', 'window', 'waitGlobalInitialized', 'getScriptId', 'DVS', source)(
+  new Function('$', 'window', 'waitGlobalInitialized', 'getScriptId', 'DVS', 'globalThis', authorSource)(
     jquery,
     { parent: { Event, dispatchEvent() {} } },
     async () => {},
@@ -27,6 +27,7 @@ async function loadCard() {
         return () => {};
       },
     },
+    authorGlobals,
   );
   await started;
   if (!registration) throw new Error('房车脚本没有注册DVS');

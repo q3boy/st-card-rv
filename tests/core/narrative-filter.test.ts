@@ -3,6 +3,7 @@ import { readdir } from 'node:fs/promises';
 import { basename, extname, resolve } from 'node:path';
 import { parse } from 'yaml';
 import type { DvsRegistration, DvsTables, DvsUpdateSourceState, DvsValues } from '../../types/sqlite-helper/dvs';
+import { authorSource, authorGlobals } from '../support/author';
 const cardRoot = resolve(import.meta.dir, '../..');
 const unusedState: DvsUpdateSourceState = {
   get char(): never {
@@ -67,14 +68,7 @@ async function loadAuthor(input: DvsTables) {
     if (typeof value === 'function') started = Promise.resolve(value());
     return { one() {} };
   };
-  new Function(
-    '$',
-    'window',
-    'waitGlobalInitialized',
-    'getScriptId',
-    'DVS',
-    await Bun.file(resolve(cardRoot, '脚本/DVS.js')).text(),
-  )(
+  new Function('$', 'window', 'waitGlobalInitialized', 'getScriptId', 'DVS', 'globalThis', authorSource)(
     jquery,
     { parent: { Event, dispatchEvent() {} } },
     async () => {},
@@ -106,6 +100,7 @@ async function loadAuthor(input: DvsTables) {
         return table;
       },
     },
+    authorGlobals,
   );
   await started;
   if (!registration) throw new Error('房车作者脚本未完成注册');
