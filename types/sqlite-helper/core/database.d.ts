@@ -61,34 +61,19 @@ export declare class SingleDatabase {
     private transient;
     private initializationCommitted;
     private dirty;
-    private unsaved;
     private saveTimer?;
     private saveTask?;
     private savesSealed;
     private firstSaveHooks?;
     private fileBaseline?;
-    private loadFailure?;
-    private backgroundFailure?;
     private tail;
-    /** `unsavedChanges` 实际翻转时同步调用，由 Worker 存储协调器汇总后广播。 */
-    onUnsavedChanged?: () => void;
     constructor(SQL: SqlJsStatic, storage: Storage, onBackgroundSaveFailed?: ((failure: BackgroundSaveFailure) => void) | undefined, saveDebounceMs?: number);
     get availability(): 'new' | 'ready' | 'disabled';
-    /** Distinguishes unreadable files from bytes that were read but cannot be opened as SQLite. */
-    get loadFailureStage(): 'read' | 'database' | undefined;
     get hasPendingFirstCommit(): boolean;
-    /**
-     * 本实例内存中有已提交、但尚未确认写入文件的修改。与 `dirty` 不同：文件写入成功即清除，
-     * 即使随后读取文件信息或首存登记失败、`dirty` 仍保留；实例停用（关闭、重新加载、导出失败）时随内存一起清除。
-     */
-    get unsavedChanges(): boolean;
-    private markUnsaved;
     /** Cancel only pending normal saves; the returned fact belongs to this close attempt. */
     sealBackgroundSaves(): boolean;
     resumeBackgroundSaves(cancelled: boolean): void;
     drain(): Promise<void>;
-    /** Maintenance waits for the existing save, never resubmits SQL or retries a failed save. */
-    waitForMaintenanceSave(timeoutMs?: number): Promise<void>;
     close(): Promise<void>;
     /** Only the Worker may call this after sealing admission and draining all queues. */
     closeForRestart(): void;
@@ -109,8 +94,6 @@ export declare class SingleDatabase {
     refreshIfChanged(): Promise<boolean>;
     private load;
     private checkFile;
-    /** Internal maintenance replacement. The coordinator has already waited for saves and backed up the original bytes. */
-    replaceForMaintenance(commands: Command[], create?: boolean): Promise<void>;
     assertFileExisting(): Promise<void>;
     fileExists(): Promise<boolean>;
     getInitializationMarker(): Promise<InitializationMarker | undefined>;

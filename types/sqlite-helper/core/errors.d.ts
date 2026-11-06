@@ -20,8 +20,6 @@ export interface ServiceErrorData {
     saveError?: ErrorDetail;
     causeError?: ErrorDetail;
     resultState?: 'not-applied' | 'unconfirmed';
-    /** SERVICE_DISABLED 的原因：本浏览器尚未完成工作模式和存储模式设置；缺省为服务未开启。 */
-    disabledReason?: 'not-configured';
     /** Identity errors describe Tavern metadata, not a database transaction. Omitted means database. */
     resultKind?: 'database' | 'identity';
     /** For identity errors, resultState describes this step, not SQL execution. */
