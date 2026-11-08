@@ -1,6 +1,6 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, rename, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { isMap, isScalar, isSeq, parseDocument } from 'yaml';
+import { isMap, isScalar, isSeq, parse, parseDocument } from 'yaml';
 
 const root = resolve(import.meta.dir, '..');
 const args = process.argv.slice(2);
@@ -41,4 +41,20 @@ for (const command of [
   const child = Bun.spawn([process.execPath, ...command], { cwd: root, stdout: 'inherit', stderr: 'inherit' });
   const exitCode = await child.exited;
   if (exitCode !== 0) process.exit(exitCode);
+}
+
+if (await Bun.file(resolve(root, 'compress-list.yaml')).exists()) {
+  const settings = parse(await readFile(resolve(root, 'tavern_sync.yaml'), 'utf8'));
+  const config = settings.配置.房车;
+  const index = resolve(root, config.本地文件路径.replace(/(?:\.yaml)?$/, '.yaml'));
+  const stem = resolve(root, config.导出文件路径.replace(/\.(?:png|json)$/, ''));
+  const output = stem + '.png';
+  const compressed = stem + '.compressed.png';
+  const child = Bun.spawn(['node', 'tools/dvs-card-compress.mjs', index, output, compressed], {
+    cwd: root, stdout: 'inherit', stderr: 'inherit',
+  });
+  const status = await child.exited;
+  if (status !== 0) process.exit(status);
+  await rename(compressed, output);
+  console.log(`房车压缩卡已保存：${output}`);
 }
