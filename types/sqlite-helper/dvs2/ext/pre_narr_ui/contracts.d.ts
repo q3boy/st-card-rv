@@ -29,7 +29,6 @@ export interface DvsPreNarrativeWorldbook {
 export interface DvsPreNarrativeContext {
     userInput: string;
     plotPlan: JsonValue | null;
-    params?: JsonValue;
     result?: JsonValue;
     prompt: DvsPreNarrativePrompt;
     worldbook: DvsPreNarrativeWorldbook;
@@ -51,8 +50,6 @@ export interface DvsPreNarrativeRegistration {
     buttonText?: string;
     insist?: string;
     condition: string;
-    paramsSchema?: JSONSchema7;
-    validateParams?(params: JsonValue): boolean;
     narrativeEntriesSkip?: readonly string[];
     component: DvsPreNarrativeComponent;
 }
@@ -60,11 +57,8 @@ export type PreNarrativeUiRecord = {
     key: null;
 } | {
     key: string;
-    params?: JsonValue;
 } | {
     key: string;
-    params?: JsonValue;
     result: JsonValue;
 };
-export declare function isJsonValue(value: unknown, ancestors?: Set<object>): value is JsonValue;
 export declare function isPreNarrativeUiRecord(input: unknown): input is PreNarrativeUiRecord;
