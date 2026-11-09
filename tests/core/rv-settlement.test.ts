@@ -189,6 +189,21 @@ describe('房车卡本轮资源结算', () => {
       expect(result.房车信息![0]).toEqual(expected);
     }
   });
+  test('按姓名补回误删角色的完整旧记录，同轮离队、新增和油料结算照常生效', async () => {
+    const card = await loadCard();
+    const origin = tables();
+    const missing = { 姓名: '林月', 同行状态: '未加入', 当前位置: '营地', 好感度: 62 };
+    origin.角色信息 = [missing, { 姓名: '苏禾', 同行状态: '同行' }];
+    const next = structuredClone(origin);
+    const departed = { 姓名: '苏禾', 同行状态: '已离开', 当前位置: '车站' };
+    const added = { 姓名: '陈青', 同行状态: '同行' };
+    next.角色信息 = [departed, added];
+    next.本轮结算 = [{ 行程: [{ 类型: '额外消耗', 资源: '油', 数量: 3 }] }];
+
+    const result = card.preUpdate({}, next, origin);
+    expect(result.角色信息).toEqual([departed, added, missing]);
+    expect(result.房车信息![0]!.油料).toBe(97);
+  });
   test('保留位置与其它业务表变更，原生输入不变且最终被删除', async () => {
     const card = await loadCard(),
       origin = tables(),

@@ -30,6 +30,10 @@ $(async () => {
     throw new Error('补给或额外消耗的资源必须是油、电或水');
   };
   const settle = (_state, newTables, oldTables) => {
+    const currentNames = new Set(newTables.角色信息?.map(row => row.姓名));
+    for (const character of oldTables.角色信息 ?? []) {
+      if (!currentNames.has(character.姓名)) newTables.角色信息.push(character);
+    }
     const rows = newTables.本轮结算 ?? [];
     const oldVehicle = oldTables.房车信息.find(row => row.标识 === '房车');
     const vehicle = newTables.房车信息.find(row => row.标识 === '房车');

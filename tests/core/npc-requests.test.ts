@@ -60,7 +60,7 @@ function setup() {
 
 test('首次请求按条目名称分组且无标题和筛选声明，返回后才统一展开宏', async () => {
   const f = setup();
-  const built = await npcPrompts.initial(f.context, f.substitute);
+  const built = await npcPrompts.initial(f.context, 2, f.substitute);
   expect(f.expanded).toEqual([]);
   const before = built.messages[1]!.content;
   expect(before.indexOf('生成规则')).toBeLessThan(before.indexOf('人设格式'));
@@ -68,7 +68,8 @@ test('首次请求按条目名称分组且无标题和筛选声明，返回后�
   expect(before).not.toMatch(/DVS_FILTER|第一条件|第二条件|不可作为标题|DVS_DATA/i);
   expect(before).toContain('<npc_generate>\n');
   expect(before).toContain('人设格式 玩家');
-  await requestNpc(f.context, undefined, '', f.substitute);
+  expect(before).toContain('本轮已确定生成 2 位新女性角色');
+  await requestNpc(f.context, 2, f.substitute);
   expect(f.expanded).toHaveLength(2);
   expect(f.requests[0]!.outputFormat).toBe('text');
   expect(f.requests[0]!.schema).toBeUndefined();
@@ -81,30 +82,39 @@ test('首次请求按条目名称分组且无标题和筛选声明，返回后�
 test('再生成附带当前完整标签和新要求，空要求使用换人要求', async () => {
   const f = setup();
   const text = npcText();
-  await requestNpc(f.context, text, '保留姓名，穿蓝外套', f.substitute);
+  await requestNpc(
+    f.context,
+    { candidate: text, others: [npcText('林秋')], requirement: '保留姓名，穿蓝外套' },
+    f.substitute,
+  );
   const user = f.requests[0]!.messages[1]!.content;
   expect(user).toContain(text);
+  expect(user).toContain(npcText('林秋'));
   expect(user).toContain('保留姓名，穿蓝外套');
   expect(user).toContain('最近正文');
   expect(user).toContain('本轮输入');
   expect(user).not.toMatch(/差异补丁|当前候选尚未成为|DVS_DATA/);
-  const reroll = await npcPrompts.regenerate(f.context, { candidate: text, requirement: ' ' }, f.substitute);
+  const reroll = await npcPrompts.regenerate(
+    f.context,
+    { candidate: text, others: [], requirement: ' ' },
+    f.substitute,
+  );
   expect(reroll.messages[1]!.content).toContain('请重新构思另一位');
 });
 
 test('缺少必需条目时明确报错，不发送空资料请求', async () => {
   const f = setup();
   f.entries.splice(0, 1);
-  await expect(requestNpc(f.context, undefined, '', f.substitute)).rejects.toThrow('缺少“人设生成”');
+  await expect(requestNpc(f.context, 2, f.substitute)).rejects.toThrow('缺少“人设生成”');
   expect(f.requests).toEqual([]);
 });
 
 test('首次和再生成的 system 及情境前缀完全相同，变化内容放在规划之后', async () => {
   const f = setup();
-  const initial = await npcPrompts.initial(f.context, f.substitute);
+  const initial = await npcPrompts.initial(f.context, 2, f.substitute);
   const regenerated = await npcPrompts.regenerate(
     f.context,
-    { candidate: npcText(), requirement: '保留姓名' },
+    { candidate: npcText(), others: [], requirement: '保留姓名' },
     f.substitute,
   );
   expect(initial.messages).toHaveLength(2);
@@ -131,7 +141,7 @@ test('再生成完整保留历史顺序，最新人设和要求不在历史重�
     { role: 'ai' as const, content: second },
     { role: 'user' as const, content: '改为短发' },
   ];
-  await requestNpc(f.context, latest, '穿蓝外套', f.substitute, history);
+  await requestNpc(f.context, { candidate: latest, others: [], requirement: '穿蓝外套', history }, f.substitute);
   const text = f.requests[0]!.messages[1]!.content;
   const messages = text.split('<messages>\n')[1]!.split('\n</messages>')[0];
   expect(messages).toBe(

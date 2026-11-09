@@ -4,12 +4,12 @@ import { npcText } from '../support/npc-profile';
 
 const host = (page: Page) => page.locator('#npc-operation');
 
-async function boot(page: Page, withVue = true, result?: { profile: string }) {
+async function boot(page: Page, withVue = true, result?: { profile: string }, count = 1) {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   if (withVue) await page.addScriptTag({ url: '/node_modules/vue/dist/vue.runtime.global.prod.js' });
-  await page.evaluate(result => {
+  await page.evaluate(({ result, count }) => {
     const owner = window as any;
     const state: any = (owner.npcTest = {
       requests: [],
@@ -43,6 +43,7 @@ async function boot(page: Page, withVue = true, result?: { profile: string }) {
       const component = state.registration.preNarrativeUi[0].component;
       const context = {
         userInput: '请让我确认一位新旅人的资料。',
+        params: { count },
         plotPlan: null,
         prompt: {
           userInput: () => '请让我确认一位新旅人的资料。',
@@ -106,7 +107,7 @@ async function boot(page: Page, withVue = true, result?: { profile: string }) {
     };
     document.body.style.margin = '0';
     document.querySelector('#background')?.remove();
-  }, result);
+  }, { result, count });
   await page.addScriptTag({ url: '/.test-data/card-rv/build/DVS.js' });
   await page.evaluate(async () => {
     await (window as any).npcReady;
@@ -117,12 +118,8 @@ async function boot(page: Page, withVue = true, result?: { profile: string }) {
   return errors;
 }
 
-async function openRequirement(page: Page) {
-  const details = host(page).locator('details.adjustment-card');
-  if (!(await details.evaluate(node => (node as HTMLDetailsElement).open))) await details.locator('summary').click();
-}
-
 async function respond(page: Page, text: string) {
+  text = `<npc_list>\n${text}\n</npc_list>`;
   await page.evaluate(
     text => (window as any).npcTest.pending.shift().resolve({ content: text, finishReason: 'stop' }),
     text,
@@ -150,9 +147,8 @@ test('重新调整先展示已保存人设，点击再生成才带着原文请�
   await expect(host(page).getByRole('button', { name: '确认人设并继续' })).toBeEnabled();
   expect(await page.evaluate(() => (window as any).npcTest.requests)).toEqual([]);
   expect(await page.evaluate(() => (window as any).npcTest.reads)).toEqual([]);
-  await openRequirement(page);
-  await host(page).getByRole('textbox', { name: '生成要求' }).fill('保留姓名，更开朗');
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('textbox', {}).fill('保留姓名，更开朗');
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(1);
   const request = await page.evaluate(() => (window as any).npcTest.requests[0]);
   expect(request.messages[1].content).toContain(original);
@@ -168,13 +164,11 @@ test('实际作者产物首次生成、修改、确认及独立只读摘要使�
   const errors = await boot(page);
   await expect(host(page).getByRole('button', { name: '确认人设并继续' })).toBeDisabled();
   await expect(host(page).getByText('林清', { exact: true })).toHaveCount(0);
-  const first = npcText().replace('\n林清:', '\n角色名:');
+  const first = npcText();
   await respond(page, first);
   await expect(host(page).locator('.edition')).toHaveText('候选 01');
-  await openRequirement(page);
-  await host(page).getByRole('textbox', { name: '生成要求' }).fill('保留姓名，改穿蓝外套');
-  await host(page).locator('.profile-head').click();
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('textbox', {}).fill('保留姓名，改穿蓝外套');
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect(host(page).getByRole('button', { name: '确认人设并继续' })).toBeDisabled();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(2);
   const request = await page.evaluate(() => (window as any).npcTest.requests[1]);
@@ -187,7 +181,7 @@ test('实际作者产物首次生成、修改、确认及独立只读摘要使�
   await respond(page, next);
   await expect(host(page).locator('.edition')).toHaveText('候选 02');
   await expect(host(page).locator('.profile-columns')).toBeVisible();
-  await expect(host(page).getByRole('textbox', { name: '生成要求' })).toHaveValue('保留姓名，改穿蓝外套');
+  await expect(host(page).getByRole('textbox', {})).toHaveValue('保留姓名，改穿蓝外套');
   await host(page).getByRole('button', { name: '确认人设并继续' }).click();
   await expect(host(page)).toHaveCount(0);
   const result = page.locator('#npc-result');
@@ -219,9 +213,8 @@ test('首次失败可重试，再生成及格式失败保留原候选和要求',
     '【当前已生成的角色信息】',
   );
   await respond(page, npcText());
-  await openRequirement(page);
-  await host(page).getByRole('textbox', { name: '生成要求' }).fill('保留姓名');
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('textbox', {}).fill('保留姓名');
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(3);
   await page.evaluate(() => (window as any).npcTest.pending.shift().reject(new Error('模拟再次请求失败')));
   await expect(host(page).getByRole('alert')).toContainText('模拟再次请求失败');
@@ -230,12 +223,12 @@ test('首次失败可重试，再生成及格式失败保留原候选和要求',
   await expect(host(page).getByRole('button', { name: '确认人设并继续' })).toBeEnabled();
   await host(page).getByRole('button', { name: '再次尝试', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(4);
-  const invalidResponse = '  <npc_林清>\n角色名:\n  基础信息:\n    姓名: 其他\n    年龄: 26\n</npc_林清>\n';
+  const invalidResponse = '<npc name="林清">\n基础信息:\n  姓名: 其他\n  年龄: 26\n</npc>';
   await respond(page, invalidResponse);
   await expect(host(page).getByRole('alert')).toContainText('基础信息中的姓名须与人设标签一致');
   await host(page).getByText('查看详情', { exact: true }).click();
-  expect(await host(page).locator('.llm-raw-response').textContent()).toBe(invalidResponse);
-  await expect(host(page).locator('.llm-raw-response').locator('npc_林清')).toHaveCount(0);
+  expect(await host(page).locator('.llm-raw-response').textContent()).toBe(`<npc_list>\n${invalidResponse}\n</npc_list>`);
+  await expect(host(page).locator('.llm-raw-response').locator('npc')).toHaveCount(0);
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => document.fonts.ready);
@@ -252,7 +245,7 @@ test('首次失败可重试，再生成及格式失败保留原候选和要求',
   await expect(host(page).getByRole('alert')).toContainText('本次请求未取得 LLM 返回。');
   await host(page).getByRole('button', { name: '再次尝试', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(6);
-  await respond(page, npcText('周宁'));
+  await respond(page, rename(npcText('周宁'), '林清'));
   await expect(host(page).locator('.edition')).toHaveText('候选 02');
   await expect(host(page).getByText('周宁', { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
@@ -264,15 +257,14 @@ test('多轮调整只保留成功历史，关闭重开只预载已确认人设',
   const second = npcText('周宁');
   const third = npcText('陈安');
   await respond(page, first);
-  await openRequirement(page);
-  const input = host(page).getByRole('textbox', { name: '生成要求' });
+  const input = host(page).getByRole('textbox', {});
   await input.fill('第一轮要求');
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(2);
-  await respond(page, second);
+  await respond(page, rename(second, '林清'));
   await expect(host(page).locator('.edition')).toHaveText('候选 02');
   await input.fill('失败的要求');
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(3);
   await page.evaluate(() => (window as any).npcTest.pending.shift().reject(new Error('模拟失败')));
   await expect(host(page).getByRole('alert')).toContainText('模拟失败');
@@ -283,10 +275,10 @@ test('多轮调整只保留成功历史，关闭重开只预载已确认人设',
   expect(retry).toContain(`<message role="ai">\n${first}\n</message>\n<message role="user">\n第一轮要求\n</message>`);
   expect(retry).not.toContain('失败的要求');
   expect(retry).toContain(`<last_npc_data>\n${second}\n</last_npc_data>`);
-  await respond(page, third);
+  await respond(page, rename(third, '周宁'));
   await expect(host(page).locator('.edition')).toHaveText('候选 03');
   await input.fill('第三轮要求');
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(5);
   const request = await page.evaluate(() => (window as any).npcTest.requests[4].messages[1].content);
   expect(request).toContain(
@@ -294,7 +286,7 @@ test('多轮调整只保留成功历史，关闭重开只预载已确认人设',
   );
   expect(request).toContain(`<last_npc_data>\n${third}\n</last_npc_data>`);
   await respond(page, third);
-  await expect(host(page).locator('.edition')).toHaveText('候选 04');
+  await expect(host(page).getByText('本次没有人设变化。')).toBeVisible();
   await host(page).getByRole('button', { name: '确认人设并继续' }).click();
   expect(await page.evaluate(() => (window as any).npcTest.results)).toEqual([{ profile: third }]);
   await page.evaluate(() => {
@@ -303,7 +295,7 @@ test('多轮调整只保留成功历史，关闭重开只预载已确认人设',
     owner.mountNpc();
   });
   await expect(host(page).getByText('陈安', { exact: true })).toBeVisible();
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+  await host(page).getByRole('button', { name: /^(按要求调整|重新生成).+/ }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(6);
   const reopened = await page.evaluate(() => (window as any).npcTest.requests[5].messages[1].content);
   expect(reopened).toContain('<messages>\n\n</messages>');
@@ -313,42 +305,49 @@ test('多轮调整只保留成功历史，关闭重开只预载已确认人设',
   expect(errors).toEqual([]);
 });
 
-test('生成要求默认折叠，长文本可保留，空输入可从底部重新生成', async ({ page }) => {
-  const errors = await boot(page);
-  await respond(page, npcText());
-  const details = host(page).locator('details.adjustment-card');
-  await expect(details).not.toHaveAttribute('open', '');
-  await expect(host(page).getByRole('textbox', { name: '生成要求' })).toBeHidden();
-  await openRequirement(page);
-  const input = host(page).getByRole('textbox', { name: '生成要求' });
-  await expect(input).toHaveValue('');
-  const longText = '保留设定'.repeat(150);
-  await input.fill(longText);
-  await expect(input).toHaveValue(longText);
-  await details.locator('summary').click();
-  await openRequirement(page);
-  await expect(input).toHaveValue(longText);
-  const labels = await host(page).locator('.flow-footer .actions button').allTextContents();
-  expect(labels.map(label => label.trim())).toEqual(['取消', '重新生成人设', '确认人设并继续']);
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
+function rename(text: string, oldName: string) {
+  return text.replace('">', `" oldname="${oldName}">`);
+}
+
+test('展开两位候选分别调整，保留输入，忽略组外人物并一次确认整组', async ({ page }) => {
+  const errors = await boot(page, true, undefined, 2);
+  const first = npcText('林夏');
+  const second = npcText('林秋');
+  await respond(page, [first, second].join('\n'));
+  const cards = host(page).locator('.profile-card');
+  await expect(cards).toHaveCount(2);
+  await expect(cards.nth(0).getByRole('textbox')).toBeVisible();
+  await expect(cards.nth(1).getByRole('textbox')).toBeHidden();
+  const requirement = '保留姐姐，妹妹改名沈夏';
+  await cards.nth(0).getByRole('textbox').fill(requirement);
+  await cards.nth(1).locator('.profile-head').click();
+  await cards.nth(1).getByRole('textbox').fill('让姐姐更开朗');
+  if (!(await cards.nth(0).getByRole('textbox').isVisible())) await cards.nth(0).locator('.profile-head').click();
+  await expect(cards.nth(0).getByRole('textbox')).toHaveValue(requirement);
+  await cards.nth(0).getByRole('button', { name: '按要求调整林夏' }).click();
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(2);
-  expect(await page.evaluate(() => (window as any).npcTest.requests[1].messages[1].content)).toContain(longText);
-  await respond(page, npcText('林清'));
-  await expect(host(page).locator('.edition')).toHaveText('候选 02');
-  await input.fill('');
-  await host(page).getByRole('button', { name: '重新生成人设', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(3);
-  expect(await page.evaluate(() => (window as any).npcTest.requests[2].messages[1].content)).toContain(
-    '请重新构思另一位符合本轮情境的 NPC',
-  );
-  await respond(page, npcText('周宁'));
-  await expect(host(page).getByText('周宁', { exact: true })).toBeVisible();
+  const renamed = npcText('沈夏');
+  const sister = npcText('林秋', { 背景设定: { 生活背景: '与妹妹沈夏旅行' } });
+  await respond(page, [rename(renamed, '林夏'), sister, npcText('陈青')].join('\n'));
+  await expect(cards).toHaveCount(2);
+  await expect(cards.first().locator('.profile-head')).toContainText('沈夏');
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: resolve(`.test-data/card-rv/browser/npc-multiple-${width}.png`), fullPage: true });
+  }
+  await host(page).getByRole('button', { name: '确认 2 位人设并继续' }).click();
+  expect(await page.evaluate(() => (window as any).npcTest.results)).toEqual([{ profile: [renamed, sister].join('\n\n') }]);
   expect(errors).toEqual([]);
 });
 
 test('等待时取消卸载，晚到结果不交付，也不影响下一次独立实例', async ({ page }) => {
   const errors = await boot(page);
-  await host(page).getByRole('button', { name: '取消', exact: true }).click();
+  await host(page).getByRole('button', { name: /关闭/ }).click();
   await expect(host(page)).toHaveCount(0);
   await page.evaluate(() => (window as any).mountNpc());
   await expect.poll(() => page.evaluate(() => (window as any).npcTest.requests.length)).toBe(2);
@@ -378,15 +377,14 @@ for (const width of [1280, 390, 320]) {
     expect(layout).toBe(width > 650 ? 'grid' : 'flex');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await host(page).getByRole('button', { name: '确认人设并继续' }).scrollIntoViewIfNeeded();
-    await expect(host(page).getByRole('button', { name: '取消', exact: true })).toBeVisible();
+    await expect(host(page).getByRole('button', { name: /关闭/ })).toBeVisible();
     await expect(host(page).getByRole('button', { name: '确认人设并继续' })).toBeVisible();
     await page.evaluate(async () => {
       await document.fonts.ready;
       await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     });
     await page.screenshot({ path: resolve(`.test-data/card-rv/browser/npc-${width}.png`), fullPage: true });
-    await openRequirement(page);
-    await host(page).getByRole('textbox', { name: '生成要求' }).fill('保留姓名，让性格更开朗');
+    await host(page).getByRole('textbox', {}).fill('保留姓名，让性格更开朗');
     await page.screenshot({ path: resolve(`.test-data/card-rv/browser/npc-expanded-${width}.png`), fullPage: true });
     expect(errors).toEqual([]);
   });

@@ -41,17 +41,32 @@ function display(value: unknown): string {
   return record(value) ? stringify(value).trim() : String(value);
 }
 
-export function parseNpcProfile(input: string): NpcProfile {
-  const text = input.trim();
-  const match = /^<npc_([^<>\s]+)>([\s\S]*?)<\/npc_\1>$/.exec(text);
-  if (!match || /<\/?npc_[^>]*>/.test(match[2]!))
-    throw new Error('人设须为一组完整且同名的 <npc_姓名> 标签，标签外不要附加文字。');
-  const document = parseDocument(match[2]!);
+function responseList(input: string) {
+  const list = /<npc_list>([\s\S]*?)<\/npc_list>/.exec(input);
+  if (!list) throw new Error('人设响应缺少完整的 <npc_list> 标签。');
+  return list[1]!;
+}
+
+function* npcBlocks(input: string) {
+  const source = input.trim();
+  const tag =
+    /\s*<npc\s+((?:name="[^"<>]+"(?:\s+oldname="[^"<>]+")?|oldname="[^"<>]+"\s+name="[^"<>]+"))\s*>([\s\S]*?)<\/npc>/gy;
+  while (tag.lastIndex < source.length) {
+    const match = tag.exec(source);
+    if (!match || /<\/?npc(?:\s|>)/.test(match[2]!))
+      throw new Error('人设须为完整的 <npc name="姓名">...</npc> 标签。');
+    const attributes = Object.fromEntries(
+      Array.from(match[1]!.matchAll(/(name|oldname)="([^"]+)"/g), attr => [attr[1], attr[2]]),
+    );
+    yield { name: attributes.name!, oldname: attributes.oldname, body: match[2]! };
+  }
+}
+
+function profileFromBlock(name: string, body: string): NpcProfile {
+  const document = parseDocument(body);
   if (document.errors.length) throw new Error(`人设 YAML 解析失败：${document.errors[0]!.message}`);
-  const data: unknown = document.toJS();
-  const name = match[1]!;
+  const profile: unknown = document.toJS();
   if (name === '角色名' || name === '实际姓名') throw new Error('请将人设标签中的姓名占位文字替换为实际姓名。');
-  const profile: unknown = Object.values(data ?? {})[0];
   if (!record(profile) || !record(profile.基础信息) || profile.基础信息.姓名 !== name)
     throw new Error('基础信息中的姓名须与人设标签一致。');
   const basic = profile.基础信息;
@@ -71,18 +86,52 @@ export function parseNpcProfile(input: string): NpcProfile {
     const group = profile[name];
     for (const key of keys) fields[key] = record(group) ? display(group[key]) : '';
   }
-  return { text, name, age: basic.年龄, fields };
+  return { text: `<npc name="${name}">${body}</npc>`, name, age: basic.年龄, fields };
 }
 
-export function parseNpcResult(result: unknown): NpcProfile {
+function validateNames(profiles: readonly NpcProfile[]) {
+  if (new Set(profiles.map(profile => profile.name)).size !== profiles.length)
+    throw new Error('同组 NPC 姓名不能重复。');
+}
+
+function readProfiles(input: string) {
+  const profiles = Array.from(npcBlocks(input), block => profileFromBlock(block.name, block.body));
+  if (!profiles.length) throw new Error('缺少 NPC 人设。');
+  validateNames(profiles);
+  return profiles;
+}
+
+export function parseInitialProfiles(input: string, count: number): NpcProfile[] {
+  const profiles = readProfiles(responseList(input));
+  if (profiles.length !== count) throw new Error(`需要 ${count} 位 NPC，实际返回 ${profiles.length} 位。`);
+  return profiles;
+}
+
+export function applyNpcAdjustment(input: string, current: readonly NpcProfile[]): NpcProfile[] {
+  const next = [...current];
+  const updated = new Set<number>();
+  for (const block of npcBlocks(responseList(input))) {
+    const index = current.findIndex(profile => profile.name === (block.oldname ?? block.name));
+    if (index < 0) continue;
+    if (updated.has(index)) throw new Error(`同一份调整中重复修改了 ${current[index]!.name}。`);
+    updated.add(index);
+    next[index] = profileFromBlock(block.name, block.body);
+  }
+  validateNames(next);
+  return next;
+}
+
+export function parseNpcResult(result: unknown): NpcProfile[] {
   if (!record(result) || typeof result.profile !== 'string') throw new Error('已保存人设缺少完整标签文本。');
-  return parseNpcProfile(result.profile);
+  return readProfiles(result.profile);
 }
 
 export function npcResultPrompt(result: unknown): string {
-  const profile = parseNpcResult(result);
-  return `以下是玩家已经确认的 NPC 人设。本轮故事采用这份资料，不另行随机生成或改写这位 NPC 的人设。
-请根据本轮用户输入和已有剧情继续正文。提供的 <npc_xxx> 标签以及内容必须在正文最后原样完整输出。
+  const profiles = parseNpcResult(result);
+  const names = profiles.map(profile => `<npc name="${profile.name}">`).join('、');
+  return `以下是玩家已经确认的 ${profiles.length} 位 NPC 人设。本轮故事采用这份资料，不另行随机生成或改写这些 NPC 的人设。
+请根据本轮用户输入和已有剧情继续正文。
+提供的 ${names} 标签以及内容必须在正文最后原样完整输出。
 
-${profile.text}`;
+${profiles.map(profile => profile.text).join('\n\n')}`;
 }
