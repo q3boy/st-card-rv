@@ -40,7 +40,7 @@ bun run docs:check
 | `bun run test` | 运行 `tests/core` 房车业务与状态栏测试及 `tests/tools` 工具检查 |
 | `bun run typecheck` | 用 Node 调用 vue-tsc，并检查测试 TypeScript |
 | `bun run build:check` | 只生成隔离的状态栏和 DVS 作者构建，不复制到卡片脚本目录、不打包或推送角色卡 |
-| `bun run build` | 构建并复制脚本，再用 `tavern_sync bundle 房车` 打包。若索引旁有 [compress-list.yaml](../compress-list.yaml)，按清单压缩输出 PNG 中的世界书正文 |
+| `bun run build` | 构建并复制脚本，再用 `tavern_sync bundle 房车` 打包。若索引旁有 [compress-list.yaml](../compress-list.yaml)，按清单压缩输出 PNG 中的世界书正文、DVS 脚本和状态栏脚本。清单填写索引引用的打包文件路径，例如 `脚本/DVS.bundle.js` |
 | `bun run build 0.1.3` | 先将 `index.yaml` 的 `版本` 和 `[DVS:版本]` 条目的 `内容` 都改为传入的版本号，再构建并打包 |
 | `bun run build:sync` | 先执行 `build`，再执行 `tavern_sync push 房车` 推送到当前连接的酒馆 |
 | `bun run test:browser [Playwright 参数]` | 隔离构建后运行 Chromium 模拟 Helper 浏览器测试，产物在 `.test-data/card-rv`；例如 `bun run test:browser --grep 地图` |
