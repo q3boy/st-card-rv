@@ -1,7 +1,7 @@
 import { type ServiceErrorData } from './core/errors';
 import type { SqlValue } from './vendor/sqljs';
 import type { SqlBinds, SerializedSqlBinds } from './core/binds';
-export declare const PROTOCOL_VERSION = 23;
+export declare const PROTOCOL_VERSION = 27;
 export declare const BUILD_ID: string;
 export interface HelloInfo extends StorageInfo {
     protocolVersion: number;
@@ -25,7 +25,8 @@ export declare const EXTENSION_TEMPLATE_PATH: string;
 export declare const EXTENSION_PATH: string;
 export declare const WORKER_URL: string;
 export declare const DEDICATED_WORKER_URL: string;
-export type WorkerMode = 'shared' | 'dedicated';
+export declare const EXECUTION_PROBE_URL: string;
+export type WorkerMode = 'shared' | 'dedicated' | 'page';
 export interface DedicatedWorkerConnect {
     type: 'connect';
     port: MessagePort;
@@ -90,7 +91,7 @@ export interface DeleteTicket {
         referenceId: number;
     }>;
 }
-export type StorageMode = 'opfs' | 'directory';
+export type StorageMode = 'opfs' | 'directory' | 'indexeddb';
 export interface StorageStatus {
     mode?: StorageMode;
     autoReloadEnabled?: boolean;
@@ -103,6 +104,8 @@ export interface StorageStatus {
     permission?: PermissionState;
     error?: ServiceErrorData;
     entityRevision?: number;
+    /** 当前存储空间中有已提交但尚未确认写入文件的修改。 */
+    unsavedChanges?: boolean;
 }
 export interface StorageInfo {
     storage: StorageStatus;
@@ -191,6 +194,22 @@ export type Action = {
 } | {
     type: 'scan';
     request: import('./scan-contracts').ScanRequest;
+    binding: StorageBinding;
+} | {
+    type: 'database-maintenance';
+    request: import('./database-maintenance-contracts').DatabaseMaintenanceRequest;
+    binding: StorageBinding;
+} | {
+    type: 'identity-restart';
+    request: import('./database-maintenance-contracts').IdentityRestartRequest;
+    binding: StorageBinding;
+} | {
+    type: 'scan-repair';
+    request: import('./scan-contracts').ScanRepairRequest;
+    binding: StorageBinding;
+} | {
+    type: 'scan-management-repair';
+    request: import('./scan-contracts').ScanManagementRepairRequest;
     binding: StorageBinding;
 } | {
     type: 'scan-remove-entry';

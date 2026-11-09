@@ -9,7 +9,7 @@ export interface PublicDatabaseApi {
     readonly chat: BusinessDatabaseHandle | null;
 }
 export interface BusinessDatabaseHandle {
-    /** Per-proxy write delay, default 3000 ms. false/0 disable; maximum 2147483647. */
+    /** Per-proxy write delay: SharedWorker defaults to 3000 ms, Worker/page to 100 ms. false/0 disable; maximum 2147483647. */
     debounce(milliseconds: number | false): this;
     query(sql: string, binds?: SqlBinds): Promise<QueryResult>;
     update(sql: string, binds?: SqlBinds): Promise<MutationResult>;

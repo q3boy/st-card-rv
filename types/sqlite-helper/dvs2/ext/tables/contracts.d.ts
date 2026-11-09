@@ -1,6 +1,8 @@
-import type { JsonValue, SqlInputValue } from '../core/binds';
-import type { SqlValue } from '../vendor/sqljs';
-import type { BusinessDatabaseHandle } from '../sdk/public-contracts';
+import type { JsonValue, SqlInputValue } from '../../../core/binds';
+import type { SqlValue } from '../../../vendor/sqljs';
+import type { BusinessDatabaseHandle } from '../../../sdk/public-contracts';
+import type { DvsPreNarrativeRegistration } from '../pre_narr_ui/contracts';
+export * from '../pre_narr_ui/contracts';
 export type DvsValues = Record<string, SqlInputValue>;
 export type DvsTables = Record<string, DvsValues[]>;
 export type DvsPromptValue = JsonValue;
@@ -59,6 +61,7 @@ export interface DvsUpdateSourceState {
 }
 export interface DvsRegistration {
     scriptId: string;
+    preNarrativeUi?: readonly DvsPreNarrativeRegistration[];
     uniqueKeys: Record<string, readonly string[]>;
     /** Request-only rows start empty on every attempt and must be removed by preUpdate. */
     virtualTables?: Record<string, DvsVirtualTable>;
@@ -112,6 +115,21 @@ export interface DvsApi {
     onUpdateStatus(callback: (status: DvsUpdateStatus) => void): () => void;
     regen(): Promise<void>;
 }
-declare global {
-    const DVS: DvsApi;
+export interface DvsFloorTable {
+    columns: string[];
+    rows: Record<string, null | number | string | Uint8Array>[];
+}
+export interface DvsFloorDataSide {
+    messageId?: number;
+    unavailable?: string;
+    rows(table: string): Promise<DvsFloorTable>;
+}
+export interface DvsFloorData {
+    messageId: number;
+    swipeId: number;
+    swipeCount: number;
+    tables: string[];
+    before: DvsFloorDataSide;
+    after: DvsFloorDataSide;
+    ddl(table: string): Promise<string | undefined>;
 }

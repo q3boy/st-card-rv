@@ -1,6 +1,14 @@
+import type { ManagementRepairPlan, ManagementRepairObservation } from './management-repair-rules';
+export type { ManagementRepairPlan, ManagementRepairObservation } from './management-repair-rules';
 export type ScanRequest = {
     operation: 'records';
 } | {
+    operation: 'management';
+    observations?: ManagementRepairObservation[];
+} | ({
+    operation: 'maintenance';
+    target: import('./database-maintenance-contracts').DatabaseMaintenanceTarget;
+} & import('./database-maintenance-contracts').DatabaseMaintenanceEvidence) | {
     operation: 'inventory';
 } | {
     operation: 'file';
@@ -93,6 +101,8 @@ export interface ScanDatabase {
     relativePath: string;
     status: 'checked' | 'missing' | 'unknown';
     reason?: string;
+    /** A SQLite-open failure is known only after file bytes were successfully read. */
+    failure?: 'read' | 'database';
     /** The in-database `__stsh_meta` table. */
     meta: 'absent' | 'valid' | 'invalid';
     /** Absent when there is no identity row; `invalid` when the row is not a usable JSON identity. */
@@ -111,7 +121,59 @@ export interface ScanFileBytes {
     lastModified: number;
     bytes: Uint8Array;
 }
-export type ScanResult = ScanSnapshot | ScanInventory | ScanFile | ScanDatabase | ScanFileBytes;
+export type ScanResult = ScanSnapshot | ScanInventory | ScanFile | ScanDatabase | ScanFileBytes | ManagementRepairPlan | import('./database-maintenance-contracts').MaintenancePlan;
+/** Table replacement requires a freshly prepared original-file digest; light changes do not. */
+export type ScanManagementRepairRequest = {
+    phase: 'prepare';
+    expected: ManagementRepairPlan;
+    observations?: ManagementRepairObservation[];
+} | {
+    phase: 'apply';
+    expected: ManagementRepairPlan;
+    backupDigest?: string;
+    observations?: ManagementRepairObservation[];
+};
+export type ScanManagementRepairResult = {
+    status: 'prepared';
+    file: ScanFileBytes;
+    digest: string;
+    plan: ManagementRepairPlan;
+} | {
+    status: 'repaired' | 'skipped' | 'blocked';
+    plan: ManagementRepairPlan;
+    requiresRescan: true;
+};
+/** Fixed scan facts for restoring one chat association. `check` never writes. */
+export interface ScanChatRepairRequest {
+    scope: 'chat';
+    phase: 'check' | 'apply';
+    avatar: string;
+    file: string;
+    charDbId: string;
+    chatDbId: string;
+    expectedRole: ScanRecord | null;
+    expectedChat: ScanRecord | null;
+    expectedTarget: ScanTarget | null;
+    /** Supplied only after the page saved and read back this ID from the fixed server chat file. */
+    confirmedChatId?: string;
+}
+export interface ScanRoleRepairRequest {
+    scope: 'char';
+    phase: 'check' | 'apply';
+    avatar: string;
+    charDbId: string;
+    expectedRole: ScanRecord;
+    expectedTarget: ScanTarget | null;
+}
+export type ScanRepairRequest = ScanChatRepairRequest | ScanRoleRepairRequest;
+export interface ScanRepairResult {
+    status: 'checked' | 'repaired' | 'unchanged' | 'skipped';
+    message: string;
+    registrationChanged: boolean;
+    record?: ScanRecord;
+    role?: ScanRecord;
+    target?: ScanTarget;
+}
 /** Permission is bounded by the concrete selection the user confirmed. */
 export interface ScanCleanupRequest {
     operationId: string;
