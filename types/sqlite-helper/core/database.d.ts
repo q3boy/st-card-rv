@@ -7,6 +7,7 @@ export interface Command {
     mode?: 'update' | 'transaction' | 'exec' | 'runSql';
     kind?: 'check' | 'write';
     expectChanges?: number;
+    statementGroup?: string;
 }
 export interface QueryResult {
     columns: string[];
@@ -122,6 +123,7 @@ export declare class SingleDatabase {
     transaction(commands: Command[], onComplete?: () => void, hooks?: TransactionHooks & {
         management?: undefined;
     }): Promise<MutationResult>;
+    private executeTransactionCommands;
     private executeCommand;
     query(command: Command, beforeExecute?: () => void): Promise<QueryResult>;
     /** The whole read occupies one existing physical queue; no arbitrary SQL enters here. */

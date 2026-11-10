@@ -121,20 +121,24 @@ export interface SerializedSqlCommand {
 }
 export type CheckedCommand = {
     kind: 'check';
+    statementGroup?: string;
     sql: string;
     binds?: SqlBinds;
 } | {
     kind: 'write';
+    statementGroup?: string;
     sql: string;
     binds?: SqlBinds;
     expectChanges?: number;
 };
 export type SerializedCheckedCommand = {
     kind: 'check';
+    statementGroup?: string;
     sql: string;
     binds?: SerializedSqlBinds;
 } | {
     kind: 'write';
+    statementGroup?: string;
     sql: string;
     binds?: SerializedSqlBinds;
     expectChanges?: number;

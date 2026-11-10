@@ -1,4 +1,4 @@
-import type { DvsConfig, RequestSnapshot } from './config';
+import { type DvsConfig, type RequestSnapshot } from './config';
 import type { DvsRequestErrorContext, ModelRequestTrace } from './request-errors';
 export interface ModelMessage {
     role: 'system' | 'user' | 'assistant';
@@ -11,7 +11,7 @@ export interface ModelResponse {
 export interface RequestOptions {
     getRequestHeaders?: () => Record<string, string>;
     fetch?: typeof fetch;
-    purpose?: 'update' | 'test';
+    purpose?: 'update' | 'test' | 'llm';
     protocol?: {
         name: string;
         schema: Record<string, unknown>;

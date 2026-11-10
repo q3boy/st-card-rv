@@ -19,9 +19,12 @@ export interface DvsConfig {
     presencePenalty: number;
     topP: number;
     topK: number;
+    aiMinimumLength: number;
     maxAttempts: number;
     retryIntervalMs: number;
     requestTimeoutSeconds: number;
+    excludeBody: string;
+    extraHeaders: string;
     extraBody: Record<string, unknown>;
 }
 export declare const DEFAULT_DVS_CONFIG: DvsConfig;
@@ -30,4 +33,6 @@ export interface RequestSnapshot {
     key: string;
     assertCurrent(): void | Promise<void>;
 }
+export declare function parseExtraHeaders(text: string): Record<string, string>;
+export declare function excludedFields(text: string): string[];
 export declare function readModelConfig(value: Partial<DvsConfig>): DvsConfig;

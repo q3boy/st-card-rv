@@ -26,6 +26,10 @@ export interface DvsConfigApi {
 }
 /** Author-facing API; execution and UI internals are not part of the declaration package. */
 export interface DvsApi extends TablesApi, DvsConfigApi {
+    llm(type: 'pre' | 'post', messages: readonly {
+        role: 'system' | 'user' | 'assistant';
+        content: string;
+    }[]): Promise<string>;
     regen(target?: {
         messageId: number;
         swipeId?: number;

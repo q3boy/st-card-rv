@@ -7,10 +7,12 @@ export declare function prepareQuery(db: Database, sql: string): Statement;
 export declare function prepareSingle(db: Database, sql: string, method: SqlMethod): Statement;
 export type CheckedSqlCommand = {
     kind: 'check';
+    statementGroup?: string;
     sql: string;
     binds?: unknown;
 } | {
     kind: 'write';
+    statementGroup?: string;
     sql: string;
     binds?: unknown;
     expectChanges?: number;
