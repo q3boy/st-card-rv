@@ -27,7 +27,7 @@ $(async () => {
     if (resource === '油') return '油料';
     if (resource === '电') return '储备电力';
     if (resource === '水') return '储备水源';
-    throw new Error('补给或额外消耗的资源必须是油、电或水');
+    throw new Error('补给或额外消耗的资源必须是油、电、水');
   };
   const settle = (_state, newTables, oldTables) => {
     const currentNames = new Set(newTables.角色信息?.map(row => row.姓名));
