@@ -137,7 +137,7 @@ bash ~/.claude/skills/codex-vision/scripts/codex-vision.sh edit --fresh "<输入
 
 必须注意的几点：
 
-1. **模型固定 `gpt-6.1-sol`。** 这台机器的 ChatGPT 账号不支持 `gpt-5.5`、`gpt-5.4`、`gpt-5.2`、`gpt-5-codex`，skill 默认模型已改成 `gpt-6.1-sol`。
+1. **模型固定 `gpt-6.2-sol`。** 这台机器的 ChatGPT 账号不支持 `gpt-5.5`、`gpt-5.4`、`gpt-5.2`、`gpt-5-codex`。
 2. **skill 已针对 Windows 修过四处：** 查文件修改时间同时支持 BSD 和 GNU 的 `stat`；识别新生成图时除了 `ig_*.png` 也认 `exec-*.png`；从会话记录取图的 Python 会逐个试 `python3`、`python`（Windows 上 `python3` 是应用商店占位程序，存在但不能运行），并把路径转成 Windows 能识别的格式；调用 codex 时加 `</dev/null`，否则后台运行会一直等标准输入。
 3. **不能并行出图。** 并行时多个任务会取到同一张“最新生成的图”，造成两张图内容相同或串图。本轮第一次并行出清晨和傍晚就出现了这种情况。所有图都串行出。
 4. **用 `CODEX_VISION_REF=<另一张图>` 可以给 `edit` 加一张参考图**（提示词里要写清第二张图只做什么用，例如只参考光照和色调）。用完要 `unset`，否则会带到下一次调用。
