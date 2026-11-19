@@ -26,9 +26,7 @@
     "format:check:files": "bun x @biomejs/biome@2.5.15 format --config-path=tools/format/format.json",
     "docs:check": "bun run scripts/docs-check.ts",
     "docs:refs:in": "bun run scripts/docs-refs.ts in",
-    "docs:refs:out": "bun run scripts/docs-refs.ts out",
-    "types:sync": "bun run scripts/sync-types.ts",
-    "hooks:install": "bun run scripts/install-hooks.ts"
+    "docs:refs:out": "bun run scripts/docs-refs.ts out"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

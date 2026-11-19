@@ -1,4 +1,4 @@
-import type { DvsApi, DvsState } from '../types/sqlite-helper/dvs';
+import type { DvsApi, DvsState } from 'st-sqlite-helper/dvs';
 
 export type DisplayValue = string | number | boolean | null | undefined;
 export const worldFields = ['日期时间', '国家', '省份', '城市', '区域', '天气'] as const;

@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { authorSource as source, authorGlobals } from '../support/author';
-import type { DvsRegistration } from '../../types/sqlite-helper/dvs';
+import type { DvsRegistration } from 'st-sqlite-helper/dvs';
 import { npcText } from '../support/npc-profile';
 import { parse } from 'yaml';
 

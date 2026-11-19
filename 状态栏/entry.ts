@@ -2,8 +2,8 @@ import { createApp, h, shallowReactive } from 'vue';
 import App from './App.vue';
 import styles from 'virtual:rv-styles';
 import { captureRvTarget, sameRvTarget, createStatusbarController, type StatusbarReadState, type RvContext, type RvMessageHelper, type RvReadTarget } from './data';
-import type { DvsApi, DvsUpdateStatus } from '../types/sqlite-helper/dvs';
-import type { PublicDatabaseApi } from '../types/sqlite-helper/sqlite-helper';
+import type { DvsApi, DvsUpdateStatus } from 'st-sqlite-helper/dvs';
+import type { PublicDatabaseApi } from 'st-sqlite-helper';
 
 interface CardOwner extends Window { __rvStatusbarInstances?: Map<string, { dispose(): void }>; SillyTavern: { getContext(): RvContext }; }
 interface HelperWindow extends Window, RvMessageHelper {

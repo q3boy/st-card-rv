@@ -3,6 +3,10 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "paths": {
+      "st-sqlite-helper": ["../../release/st-sqlite-helper/types/sqlite-helper.d.ts"],
+      "st-sqlite-helper/dvs": ["../../release/st-sqlite-helper/types/dvs.d.ts"]
+    },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
     "noEmit": true,

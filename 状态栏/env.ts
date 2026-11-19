@@ -1,4 +1,4 @@
-import type { BusinessDatabaseHandle, PublicError } from '../types/sqlite-helper/sqlite-helper';
+import type { BusinessDatabaseHandle, PublicError } from 'st-sqlite-helper';
 
 export interface AmapConfig { key: string; securityJsCode: string; }
 export interface AmapConfigSaved { config: AmapConfig; committed: true; persisted: false; message: string; }

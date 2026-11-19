@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 import { readdir } from 'node:fs/promises';
 import { basename, extname, resolve } from 'node:path';
 import { parse } from 'yaml';
-import type { DvsRegistration, DvsTables, DvsUpdateSourceState, DvsValues } from '../../types/sqlite-helper/dvs';
+import type { DvsRegistration, DvsTables, DvsUpdateSourceState, DvsValues } from 'st-sqlite-helper/dvs';
 import { authorSource, authorGlobals } from '../support/author';
 const cardRoot = resolve(import.meta.dir, '../..');
 const unusedState: DvsUpdateSourceState = {

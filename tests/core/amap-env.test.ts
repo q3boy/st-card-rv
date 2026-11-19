@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import type { BusinessDatabaseHandle, SqlBinds } from '../../types/sqlite-helper/sqlite-helper';
+import type { BusinessDatabaseHandle, SqlBinds } from 'st-sqlite-helper';
 import { AmapEnvError, readAmapConfig, saveAmapConfig } from '../../状态栏/env';
 import { gate, sqlJs } from '../support/database';
 

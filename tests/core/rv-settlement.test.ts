@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import type { DvsPromptTables, DvsPromptValues } from '../../types/sqlite-helper/dvs';
+import type { DvsPromptTables, DvsPromptValues } from 'st-sqlite-helper/dvs';
 import { sqlJs } from '../support/database';
 import { authorSource, authorGlobals } from '../support/author';
 

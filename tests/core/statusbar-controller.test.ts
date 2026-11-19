@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import type { DvsState } from '../../types/sqlite-helper/dvs';
+import type { DvsState } from 'st-sqlite-helper/dvs';
 import { createStatusbarController, type RvReadTarget, type StatusbarReadState } from '../../状态栏/data';
 import { gate } from '../support/database';
 

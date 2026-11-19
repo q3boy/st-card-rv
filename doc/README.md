@@ -15,9 +15,11 @@
 | 在获授权后部署真实酒馆验证、恢复数据 | [真实酒馆部署验证流程](真实酒馆部署验证流程.md) |
 | 查询 DVS 公共接口和卡片接入 | [作者手册](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/dvs/指南/DVS作者使用手册.md)、[接口参考](https://github.com/q3boy/st-sqlite-helper/blob/master/doc/dvs/指南/DVS接口与进阶用法.md) |
 
-## 独立开发环境
+## 开发环境
 
-在房车仓库根目录执行以下命令。使用 Bun 1.4.2、支持 `node --experimental-strip-types` 的 Node（至少 22.6.0）和本库 Playwright 所需的 Chromium；TypeScript 由本库依赖锁定为 6.0.3。
+首次开发房车卡时，在 SQLite Helper 主仓库根目录执行 `git submodule update --init -- "card/房车" release/st-sqlite-helper`。房车源码和测试通过 [tsconfig.json](../tsconfig.json) 的路径映射直接引用发布子模块 `release/st-sqlite-helper/types/` 中的公开声明。
+
+进入 `card/房车/` 后执行以下命令。使用 Bun 1.4.2、支持 `node --experimental-strip-types` 的 Node（至少 22.6.0）和本库 Playwright 所需的 Chromium；TypeScript 由本库依赖锁定为 6.0.3。
 
 ```sh
 bun install --frozen-lockfile
@@ -48,14 +50,6 @@ bun run docs:check
 | `bun run encode-webp <PNG 目录> <输出目录>` | 将 `rv-*.png` 编码为同名 WebP；两目录均由调用者指定 |
 
 `build` 会改写卡片脚本目录并生成角色卡 PNG。不传版本参数时保留现有版本；传参时先修改源文件，后续构建或打包失败也会保留已写入的版本号。只验证构建时运行 `bun run build:check`，默认输出到 `.test-data/card-rv/build`，可用环境变量 `CARD_RV_BUILD_DIR` 指定其他输出目录，相对路径以房车仓库根目录解析，绝对路径保持原位置。推送前的授权、专用卡准备、同步连接与读回见[真实酒馆部署验证流程](真实酒馆部署验证流程.md)。
-
-## 公开声明与提交 hook
-
-`types/sqlite-helper/` 保存完整公开声明副本，包含两个入口、依赖及随包提供的第三方声明；独立构建直接使用此副本。正常安装、构建和测试不读取父仓库、不触发同步。
-
-需要提交前同步时，显式运行 `bun run hooks:install` 安装本库 pre-commit。已有默认 pre-commit 或其它 `core.hooksPath` 时安装器停止并说明如何合并，不覆写原 hook。hook 在房车按 `card/房车/` 挂载时尝试读取父库 `release/st-sqlite-helper/types`；来源不存在便保留副本并允许提交，来源存在但读取、复制或暂存失败会使提交失败。
-
-也可运行 `bun run types:sync <声明目录>` 手工指定本地来源；省略参数使用同一默认位置，显式同步遇到来源不存在时报错。有变化时打印来源 `manifest.json` 中的版本（没有则显示未知）和增删改文件清单，同步并暂存本库声明目录。它只同步声明，不比较版本高低；不支持对该目录手工修改或部分暂存，提交前应核对暂存差异。构建工具副本各自维护，不随声明同步。
 
 ## 清理与工具
 

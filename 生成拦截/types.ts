@@ -3,4 +3,4 @@ export type {
   DvsPreNarrativeContext,
   DvsPreNarrativeModelRequest,
   DvsPreNarrativeRegistration,
-} from '../types/sqlite-helper/dvs';
+} from 'st-sqlite-helper/dvs';

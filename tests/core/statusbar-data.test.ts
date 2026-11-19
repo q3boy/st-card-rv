@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 import { belongingKey, captureRvTarget, formatDate, formatValue, readRvData, resourceRatio } from '../../状态栏/data';
 import { gate } from '../support/database';
-import type { DvsState } from '../../types/sqlite-helper/dvs';
+import type { DvsState } from 'st-sqlite-helper/dvs';
 
 test('显示只替换缺失与精确未知，保留零、负值、空串和无', () => {
   expect([undefined, null, '未知', 0, -25, '', '无', '未知原因', false].map(formatValue)).toEqual([

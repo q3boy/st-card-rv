@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
-import type { DvsUpdateStatus } from '../../types/sqlite-helper/dvs';
+import type { DvsUpdateStatus } from 'st-sqlite-helper/dvs';
 
 export const rvHost = (page: Page) => page.locator('#rv-statusbar-rv-test');
 const errors = new WeakMap<Page, string[]>();

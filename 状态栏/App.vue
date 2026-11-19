@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
-import type { BusinessDatabaseHandle } from '../types/sqlite-helper/sqlite-helper';
-import type { DvsInjectFlags, DvsUpdateStatus } from '../types/sqlite-helper/dvs';
+import type { BusinessDatabaseHandle } from 'st-sqlite-helper';
+import type { DvsInjectFlags, DvsUpdateStatus } from 'st-sqlite-helper/dvs';
 import { formatValue, resourceRatio, type DisplayValue, type RvDisplayData } from './data';
 import { measureViewport, fitPosition, availableSize } from './geometry';
 import { readAmapConfig, saveAmapConfig, AmapEnvError } from './env';
