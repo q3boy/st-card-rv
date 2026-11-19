@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://testingcf.jsdelivr.net/gh/StageDog/tavern_sync/dist/schema/character.zh.json
 头像: 封面
-版本: "0.3.0"
+版本: "0.4.0"
 作者: "卡卡西天取经"
 备注: |-
   必备插件：
@@ -29,7 +29,7 @@
     递归:
       不可被其他条目激活: true
       不可激活其他条目: true
-    内容: "0.3.0"
+    内容: "0.4.0"
   - 名称: '[DVS:DDL]v0.1.0'
     启用: false
     激活策略:
@@ -358,9 +358,20 @@
               pre_narr_ui: true
               tables_opt: true
               plot_plan: true
+              memory: true
             config:
               lb_opt:
                 llm_filter: true
+              memory:
+                模块:
+                  角色资料:
+                    开启: false
+                  地点资料:
+                    开启: true
+                  物品记录:
+                    开启: false
+                  剧情线索:
+                    开启: true
         按钮:
           启用: false
           按钮列表: []

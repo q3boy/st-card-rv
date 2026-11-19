@@ -1,3 +1,4 @@
+import type { StorageMode } from './protocol';
 import type { ManagementRepairPlan, ManagementRepairObservation } from './management-repair-rules';
 export type { ManagementRepairPlan, ManagementRepairObservation } from './management-repair-rules';
 export type ScanRequest = {
@@ -77,12 +78,15 @@ export interface ScanFile {
     relativePath: string;
     status: 'exists' | 'missing' | 'unknown';
     size?: number;
+    format?: 'sqlite' | 'brotli';
     reason?: string;
 }
 export interface ScanEntry {
     relativePath: string;
     kind: 'file' | 'directory';
     size?: number;
+    lastModified?: number;
+    format?: 'sqlite' | 'brotli';
     /** The first 16 bytes are the SQLite file header. */
     sqlite?: boolean;
     /** The directory directly contains browser temporary files, which are skipped and never listed. */
@@ -93,12 +97,22 @@ export interface ScanEntry {
 export interface ScanInventory {
     entries: ScanEntry[];
     issues: ScanIssue[];
+    mode?: StorageMode;
+}
+export declare function scanFileKey(path: string, inventory?: ScanInventory): string;
+/** Key chat files by logical database path while retaining the physical file chosen by the storage reader. */
+export declare function scanEntriesByPath(inventory?: ScanInventory): Map<string, ScanEntry>;
+export interface ScanFileSelection {
+    /** Actual selected path; empty when the scan found no file. */
+    expectedFile?: string;
+    expectedFileFormat?: 'sqlite' | 'brotli';
 }
 /** Facts read from a role or chat database file on disk; unsaved changes of a loaded instance are not included. */
 export interface ScanDatabase {
     charDbId: string;
     chatDbId?: string;
     relativePath: string;
+    format?: 'sqlite' | 'brotli';
     status: 'checked' | 'missing' | 'unknown';
     reason?: string;
     /** A SQLite-open failure is known only after file bytes were successfully read. */
@@ -175,7 +189,7 @@ export interface ScanRepairResult {
     target?: ScanTarget;
 }
 /** Permission is bounded by the concrete selection the user confirmed. */
-export interface ScanCleanupRequest {
+export interface ScanCleanupRequest extends ScanFileSelection {
     operationId: string;
     expected: ScanRecord;
     removeRecord: boolean;
@@ -208,7 +222,7 @@ export interface ScanCleanupResult {
     };
 }
 /** Removal of one file or empty directory that had no basis when scanned. */
-export interface ScanEntryRequest {
+export interface ScanEntryRequest extends ScanFileSelection {
     relativePath: string;
     entry: 'file' | 'directory';
 }
@@ -234,5 +248,5 @@ export interface ScanBasisFacts {
  * Whether a path has a reason to be kept. Comparison ignores case, because a case-insensitive file
  * system (Windows) resolves a differently cased name to the registered file; keeping one extra file is safer.
  */
-export declare function scanEntryHasBasis(relativePath: string, kind: 'file' | 'directory', facts: ScanBasisFacts): boolean;
+export declare function scanEntryHasBasis(relativePath: string, kind: 'file' | 'directory', facts: ScanBasisFacts, mode?: StorageMode): boolean;
 export declare function scanBasisFacts(snapshot: Pick<ScanSnapshot, 'records' | 'targets'>): ScanBasisFacts;

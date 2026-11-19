@@ -64,6 +64,15 @@ test('编译后的唯一作者注册接入NPC屏蔽和原文交接，卡片引�
   const script = index.扩展字段.酒馆助手.脚本库.find((item: { 名称: string }) => item.名称 === 'DVS');
   expect(script.文件.replaceAll('\\', '/')).toBe('脚本/DVS.bundle.js');
   expect(script.数据.dvs.exts.pre_narr_ui).toBe(true);
+  expect(script.数据.dvs.exts.memory).toBe(true);
+  expect(script.数据.dvs.config.memory).toEqual({
+    模块: {
+      角色资料: { 开启: false },
+      地点资料: { 开启: true },
+      物品记录: { 开启: false },
+      剧情线索: { 开启: true },
+    },
+  });
   run.close();
 });
 

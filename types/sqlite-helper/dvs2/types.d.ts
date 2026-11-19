@@ -2,7 +2,7 @@ import type { ExtensionKey, DvsScriptConfig } from './contracts';
 import type { JSONSchema7 } from '../vendor/json-schema';
 import type { Component, Ref, ShallowRef } from '../vendor/vue';
 import type { JsonValue } from '../core/binds';
-import type { DvsTables, DvsPromptTables, DvsPromptValues, DvsUpdateSourceState, DvsState, DvsPromptState, DvsApi, DvsRegistration, DvsRegisterOptions } from './ext/tables/contracts';
+import type { DvsTables, DvsPromptTables, DvsPromptValues, DvsUpdateSourceState, DvsState, DvsTemplateState, DvsApi, DvsRegistration, DvsRegisterOptions } from './ext/tables/contracts';
 import type { BusinessDatabaseHandle, PublicDatabaseApi } from '../sdk/public-contracts';
 import type { DvsHelperPort } from './ext/tables/helper';
 import type { WorldbookReader } from './worldbook';
@@ -64,7 +64,13 @@ export type Dependency = ExtensionKey | {
     readonly key: ExtensionKey;
 };
 export type ExtensionDependencies = Partial<Record<StageName, readonly Dependency[]>>;
+export interface InternalTableDefinition {
+    readonly name: string;
+    readonly uniqueKeys: string | readonly string[];
+}
+export type InternalSchemas = Record<string, Record<string, TableSchema>>;
 export interface ExtensionDefinition {
+    readonly internalTables?: readonly InternalTableDefinition[];
     readonly key: ExtensionKey;
     readonly default_config?: Readonly<Record<string, unknown>>;
     readonly controller?: ExtensionControllerDefinition;
@@ -170,7 +176,9 @@ export type CommittedTablesPayload = Omit<SourceTablesPayload, 'state' | 'tables
 };
 export type TablesPayload<S extends StageName> = S extends 'aiResp' ? SourceTablesPayload | CommittedTablesPayload : SourceTablesPayload;
 export interface StagePayload<S extends StageName = StageName> {
-    tables?: TablesPayload<S>;
+    tables?: TablesPayload<S> & {
+        readonly internal?: TablesPayload<S>;
+    };
     lb_opt?: LorebookOptimizePayload;
     tables_opt?: TablesOptimizePayload;
 }
@@ -255,6 +263,8 @@ export interface ExtensionHelper {
     readonly lorebook: WorldbookReader;
 }
 export interface StageHelper {
+    readonly schemas?: Readonly<Record<string, TableSchema>>;
+    readonly internalSchemas?: InternalSchemas;
     readonly char: BusinessDatabaseHandle;
     readonly chat: BusinessDatabaseHandle;
     readonly sql: DvsHelperPort;
@@ -294,6 +304,7 @@ export interface LorebookOptimizeCapsule {
 export type TablesCapsule = VariablePatch;
 export type LorebookRequest = 'narrative' | 'user' | 'ai';
 export interface LorebookTags {
+    owner?: string;
     metadata?: 'ddl' | 'init' | 'version';
     stages: readonly LorebookRequest[];
     user?: 'filterable' | 'filter_rules' | 'lorebook_filter_rules' | 'table_filter_rules' | 'plot';
@@ -405,6 +416,7 @@ export interface ExtensionDisplay {
 }
 export type NonGenerationApi = Pick<DvsApi, 'getState' | 'onRegistrationChange' | 'onUpdate' | 'getUpdateStatus' | 'onUpdateStatus' | 'regen' | 'reInject' | 'table' | 'lorebookVersionCheck'>;
 export interface TablesReadContext extends DisplayDatabases {
+    readonly internalSchemas?: InternalSchemas;
     readonly target: DisplayTarget;
     readonly versionid?: string;
     readonly registration: Readonly<DvsRegistration>;
@@ -414,7 +426,7 @@ export interface TablesReadContext extends DisplayDatabases {
 }
 export interface TablesQueryFunctions {
     openState(input: TablesReadContext): Promise<DvsState>;
-    openPromptState(input: TablesReadContext): Promise<DvsPromptState>;
+    openPromptState(input: TablesReadContext): Promise<DvsTemplateState>;
     openFloorData(input: {
         current: TablesReadContext;
         before?: TablesReadContext;
@@ -424,7 +436,7 @@ export interface TablesQueryFunctions {
 export interface NonGenerationController {
     prepareTables(target: DisplayTarget, signal: AbortSignal): Promise<TablesReadContext>;
     getState(target: DisplayTarget, signal: AbortSignal): Promise<DvsState>;
-    getPromptState(target: DisplayTarget, signal: AbortSignal): Promise<DvsPromptState>;
+    getPromptState(target: DisplayTarget, signal: AbortSignal): Promise<DvsTemplateState>;
     readFloorData(target: DisplayTarget, signal: AbortSignal): Promise<DvsFloorData>;
     reroll(target: DisplayTarget): Promise<void>;
     clearUser(target: DisplayTarget): Promise<void>;

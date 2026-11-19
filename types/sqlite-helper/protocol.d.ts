@@ -1,6 +1,7 @@
 import { type ServiceErrorData } from './core/errors';
 import type { SqlValue } from './vendor/sqljs';
 import type { SqlBinds, SerializedSqlBinds } from './core/binds';
+import type { ChatStorageOptions } from './chat-storage-settings';
 export declare const PROTOCOL_VERSION = 27;
 export declare const BUILD_ID: string;
 export interface HelloInfo extends StorageInfo {
@@ -185,13 +186,30 @@ export type DatabaseAction = ({
     binds?: SerializedSqlBinds;
 } | {
     type: 'viewer';
-    request: import('./viewer-contracts').ViewerRequest;
+    request: import('./viewer-contracts').ViewerRequest | {
+        operation: 'compression-sample';
+    };
 } | {
     type: 'check-permission';
 }) & {
     binding?: StorageBinding;
 };
 export type Action = {
+    type: 'chat-fork-prepare';
+    binding: StorageBinding;
+    targetEntity: string;
+    chatDbId: string;
+    fids: Uint8Array[];
+    replacing?: boolean;
+} | {
+    type: 'chat-fork-confirm';
+    binding: StorageBinding;
+    targetEntity: string;
+    chatDbId: string;
+    replacement?: {
+        expectedId: string | null;
+    };
+} | {
     type: 'scan-cleanup';
     request: import('./scan-contracts').ScanCleanupRequest;
     binding: StorageBinding;
@@ -219,11 +237,11 @@ export type Action = {
     type: 'scan-remove-entry';
     request: import('./scan-contracts').ScanEntryRequest;
     binding: StorageBinding;
-} | {
+} | ({
     type: 'scan-remove-target';
     target: import('./scan-contracts').ScanTarget;
     binding: StorageBinding;
-} | {
+} & import('./scan-contracts').ScanFileSelection) | {
     type: 'entity-delete-begin';
     kind: 'char' | 'chat';
     entity: string;
@@ -322,6 +340,9 @@ export type Action = {
 } | {
     type: 'storage-status';
 } | {
+    type: 'chat-storage-settings';
+    options: ChatStorageOptions;
+} | {
     type: 'storage-configure';
     mode: StorageMode;
     autoReloadEnabled: boolean;
@@ -332,6 +353,7 @@ export type Action = {
 export type Request = Action & {
     requestId: string;
     protocolVersion: number;
+    chatStorage?: ChatStorageOptions;
 };
 export type ClientAction = Exclude<Action, {
     type: 'transaction' | 'checked-transaction' | 'query' | 'update';

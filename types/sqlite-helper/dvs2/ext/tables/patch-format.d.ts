@@ -61,9 +61,6 @@ export declare const PATCH_SCHEMA: {
                     };
                     keys: {
                         type: string;
-                        propertyNames: {
-                            minLength: number;
-                        };
                         additionalProperties: {
                             anyOf: {
                                 type: string;
@@ -94,9 +91,6 @@ export declare const PATCH_SCHEMA: {
                         };
                         keys: {
                             type: string;
-                            propertyNames: {
-                                minLength: number;
-                            };
                             additionalProperties: {
                                 anyOf: {
                                     type: string;

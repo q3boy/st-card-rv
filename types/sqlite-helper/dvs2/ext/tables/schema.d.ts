@@ -23,6 +23,7 @@ export type RequestTableSchema = TableSchema | {
 export declare function validateVirtualTables(input: Record<string, DvsVirtualTable> | undefined, realKeys: Record<string, readonly string[]>): Record<string, DvsVirtualTable>;
 export declare function requestSchemas(real: Record<string, TableSchema>, virtualTables?: Record<string, DvsVirtualTable>): Record<string, RequestTableSchema>;
 /** DVS system tables; the read-only scan compares stored definitions with these statements. */
+export declare const DVS_EXT_VERSION_TABLE_SQL = "CREATE TABLE IF NOT EXISTS \"_dvs_ext_version\" (key TEXT PRIMARY KEY NOT NULL, version TEXT NOT NULL)";
 export declare const DVS_VERSION_TABLE_SQL = "CREATE TABLE IF NOT EXISTS \"_dvs_version\" (singleton INTEGER PRIMARY KEY CHECK (singleton = 1), version TEXT NOT NULL)";
 export declare const DVS_GC_COUNTER_TABLE_SQL = "CREATE TABLE \"_dvs_gc_counter\" (singleton INTEGER PRIMARY KEY CHECK (singleton = 1), successful_updates INTEGER NOT NULL CHECK (typeof(successful_updates) = 'integer' AND successful_updates >= 0))";
 export declare function indexTableName(name: string): string;

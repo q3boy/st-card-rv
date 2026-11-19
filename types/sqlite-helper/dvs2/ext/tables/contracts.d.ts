@@ -33,6 +33,9 @@ export interface DvsPromptTable {
 export interface DvsPromptState {
     table(name: string): DvsPromptTable;
 }
+export interface DvsTemplateState extends DvsPromptState {
+    internal(key: string): DvsPromptState;
+}
 export interface DvsRow {
     [field: string]: any;
     update(): Promise<void>;

@@ -1,4 +1,4 @@
-import type { SqlJsStatic, SqlValue } from '../vendor/sqljs';
+import type { Database, SqlJsStatic, SqlValue } from '../vendor/sqljs';
 import { type ServiceErrorData } from './errors';
 import type { ViewerRequest, ViewerFile } from '../viewer-contracts';
 export interface Command {
@@ -88,6 +88,10 @@ export declare class SingleDatabase {
     sealBackgroundSaves(): boolean;
     resumeBackgroundSaves(cancelled: boolean): void;
     drain(): Promise<void>;
+    /** Copy committed memory, including changes still waiting for their background save. */
+    committedSnapshot(beforeExport?: () => void): Promise<Uint8Array>;
+    /** The caller reserved a new target; persist its complete copy before Tavern opens it. */
+    createFromSnapshot(bytes: Uint8Array, marker: InitializationMarker, prepare?: (db: Database) => Command[]): Promise<void>;
     /** Maintenance waits for the existing save, never resubmits SQL or retries a failed save. */
     waitForMaintenanceSave(timeoutMs?: number): Promise<void>;
     close(): Promise<void>;
