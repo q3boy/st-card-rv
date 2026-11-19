@@ -66,6 +66,7 @@ test('编译后的唯一作者注册接入NPC屏蔽和原文交接，卡片引�
   expect(script.数据.dvs.exts.pre_narr_ui).toBe(true);
   expect(script.数据.dvs.exts.memory).toBe(true);
   expect(script.数据.dvs.config.memory).toEqual({
+    写作要求: expect.stringContaining('YYYY-MM-DD'),
     模块: {
       角色资料: { 开启: false },
       地点资料: { 开启: true },
@@ -73,6 +74,8 @@ test('编译后的唯一作者注册接入NPC屏蔽和原文交接，卡片引�
       剧情线索: { 开启: true },
     },
   });
+  expect(script.数据.dvs.config.memory.写作要求).toContain('HH:mm');
+  expect(script.数据.dvs.config.memory.写作要求).toContain('地名·具体场所');
   run.close();
 });
 
